@@ -947,12 +947,13 @@ PUSHOVER_API_TOKEN=your_api_token
 
 ### 兼容性与 issue 跟踪说明（通知投递迭代）
 
-- 本节改动为 `#1311` 的分阶段计划（P0-P7）治理片段之一，当前阶段默认以 `Refs #1311` 跟踪，避免单次 PR 关闭 umbrella issue。
+- 本节改动为 `#1311` 的分阶段计划（P0-P7）治理片段之一，PR 描述必须以 `Refs #1311` 跟踪，避免使用 `Closes`、`Fixes` 或 `Resolves` 搭配 `#1311` 让单次 PR 关闭 umbrella issue。
 - 通知投递体验与诊断仅收口链路与展示语义，不涉及模型名、provider、Base URL、LLM 配置清理或持久化迁移语义；回退路径为恢复到历史配置行为。
+- 对于结构化检测中出现的“外部模型/API 风险”或“迁移语义风险”，PR 描述需说明这是既有检测规则对通知新增配置项的静态覆盖，不代表本轮引入模型/provider/Base URL、LLM 路由、`.env` 持久化迁移或旧配置清理的运行时变更。
 - 兼容性核验依据：
   - 官方来源：<https://docs.litellm.ai/docs/providers/openai_compatible>、<https://platform.openai.com/docs/api-reference/chat/create>
   - 运行时依赖窗口：`requirements.txt` 中 `litellm>=1.80.10,!=1.82.7,!=1.82.8,<2.0.0`
-  - 建议回归测试：`tests/test_notification_diagnostics.py`、`tests/test_feishu_doc.py`、`./scripts/ci_gate.sh`，以及 `python main.py --check-notify` 的投递形态输出；如需更完整静态验证，可补充 `python -m pytest -m "not network" tests/test_notification_diagnostics.py tests/test_feishu_doc.py`。
+  - PR 描述需记录实际验证结果：`./scripts/ci_gate.sh`、`python main.py --check-notify`、`tests/test_notification_diagnostics.py`、`tests/test_feishu_doc.py`；如需更完整静态验证，可补充 `python -m pytest -m "not network" tests/test_notification_diagnostics.py tests/test_feishu_doc.py`。
 
 ---
 

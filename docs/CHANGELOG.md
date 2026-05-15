@@ -83,6 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - [文档] 明确本轮仅新增市场复盘底层数据源能力（概念排行、人气股、涨停池），未修改模型名、provider、Base URL、LLM 运行时入口或 `.env` 兼容语义；回退路径为回滚本次变更版本，不需要执行配置迁移。
 - [文档] 明确 #1311 的 umbrella 分拆节奏：每个阶段性 PR 采用 `Refs #1311` 串联，不以单次 PR 关闭 issue；当前变更仅扩展通知投递体验/诊断文档，未改模型名、provider、Base URL、LLM 运行时入口与 `.env` 配置迁移语义；兼容性证据与回退路径已同步写入 `docs/notifications.md`、`docs/full-guide*.md`（含 `tests/test_notification_diagnostics.py`、`tests/test_feishu_doc.py`）。
 - [文档] 本分阶段治理 PR 明确要求在说明中补充 `./scripts/ci_gate.sh` 与 `python main.py --check-notify`（必要时加 `python -m pytest -m "not network"`）的执行结果，并使用 `Refs #1311` 做 issue 串联，避免误关闭 umbrella。
+- [文档] 收紧 `#1311` 分阶段 PR 描述口径：必须用 `Refs #1311` 关联 umbrella，逐项说明结构化模型/API 或迁移风险为既有静态检测覆盖新增通知配置项，并记录 `./scripts/ci_gate.sh`、`python main.py --check-notify` 等实际验证结果。
 - [新功能] Windows 桌面安装版接入 electron-updater，发现新版本后可后台下载并在用户确认后重启安装；Release 工作流同步上传自动更新所需元数据。
 - [测试] 完善桌面端更新链路验收说明：补充 `apps/dsa-desktop` 与打包产物元数据的本地验证步骤（Web 构建、桌面测试/构建、`latest.yml` 与 `*.blockmap` 检查），并明确 Windows/NSIS 部分需在 Windows 发布链路复核。
 - [测试] 补充 `docs/desktop-package.md` 对 Windows NSIS 与 `desktop-release` 链路的发布级复核要求：注明 Linux 环境不能直接产出 Windows 安装器，要求在 Windows 环境补齐 `latest.yml`/`*.blockmap` 与 installer 的版本一致性与附件核对。

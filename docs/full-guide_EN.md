@@ -759,12 +759,13 @@ If no reachable Web base URL or history record is available, DSA should not gene
 
 ### Compatibility and issue-tracking note (notification rollout)
 
-- This scope is part of the `#1311` umbrella split (P0-P7). Please link phase PRs with `Refs #1311` rather than closing the umbrella issue directly in a single PR.
+- This scope is part of the `#1311` umbrella split (P0-P7). PR descriptions must link phase work with `Refs #1311`, and must not combine `Closes`, `Fixes`, or `Resolves` with `#1311` for a single phase PR.
 - Delivery rollout only adjusts notification shape and fallback behavior; it does not change model names, provider settings, Base URL semantics, LLM config cleanup, or persistence migration behavior. Rollback path remains reverting related runtime behavior to the previous version.
 - Compatibility verification:
+  - If structured validation reports external model/API or migration risks, the PR description should state that this is an existing static rule matching newly introduced notification keys; it does not imply runtime model/provider/Base URL, LLM routing, `.env` persistence migration, or legacy config cleanup behavior changed in this PR.
   - Official references: <https://docs.litellm.ai/docs/providers/openai_compatible>, <https://platform.openai.com/docs/api-reference/chat/create>
   - Dependency window: `litellm>=1.80.10,!=1.82.7,!=1.82.8,<2.0.0` in `requirements.txt`
-  - Regression checks: `tests/test_notification_diagnostics.py`, `tests/test_feishu_doc.py`, `./scripts/ci_gate.sh`, and output from `python main.py --check-notify` (optional full static check: `python -m pytest -m "not network" tests/test_notification_diagnostics.py tests/test_feishu_doc.py`).
+  - PR descriptions should record actual verification results for `./scripts/ci_gate.sh`, `python main.py --check-notify`, `tests/test_notification_diagnostics.py`, and `tests/test_feishu_doc.py` (optional full static check: `python -m pytest -m "not network" tests/test_notification_diagnostics.py tests/test_feishu_doc.py`).
 
 ### Discord
 
