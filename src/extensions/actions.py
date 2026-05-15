@@ -54,7 +54,7 @@ class ActionMode(str, Enum):
 
 @dataclass
 class ActionBudget:
-    timeout_seconds: float = 60
+    timeout_seconds: float = 0
     max_llm_calls: int = 0
     max_items: int = 10
 
@@ -65,7 +65,7 @@ class ActionBudget:
             timeout_seconds=_coerce_float(
                 data.get("timeout_seconds"),
                 field_name="budget.timeout_seconds",
-                default=60,
+                default=0,
             ),
             max_llm_calls=_coerce_int(
                 data.get("max_llm_calls"),

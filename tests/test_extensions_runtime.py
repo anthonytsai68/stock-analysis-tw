@@ -108,6 +108,17 @@ class ExtensionRuntimeTestCase(unittest.TestCase):
         self.assertTrue(result.ok)
         self.assertEqual(result.status, "completed")
 
+    def test_omitted_budget_does_not_cap_action_timeout(self):
+        action = ActionDefinition("test.long", "test", "Long action", _echo, timeout_seconds=300)
+        runtime = self._runtime(action)
+        context = ActionContext.from_mapping({})
+
+        result = runtime.execute_action("test.long", context={})
+
+        self.assertTrue(result.ok)
+        self.assertEqual(context.budget.timeout_seconds, 0.0)
+        self.assertEqual(runtime._timeout_seconds(action, context), 300)
+
     def test_structured_errors_for_missing_permission_depth_timeout_and_handler(self):
         missing = ExtensionRuntime().execute_action("missing.action")
         denied = self._runtime(guard=ActionPermissionGuard(allowed_actions={"other.action"})).execute_action("test.echo")
