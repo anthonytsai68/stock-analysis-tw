@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - [修复] 收口 Web 中文界面残留英文文案与设置页 help 缺口，回测页改为中文展示，并让 Web 设置页仅展示已注册且带说明的配置项。
 
-- [文档] 澄清调度文档边界：`SCHEDULE_TIME` 仍仅影响本地内置调度（`python main.py --schedule`）；`GitHub Actions` 的触发时点仍由 `00-daily-analysis.yml` 的固定 `cron` 决定（周一到周五 10:00 UTC / 北京18:00），未实现通过 Actions `SCHEDULE_TIME` 动态调整触发时间。
+- [文档] 澄清 Issue #1497 的边界：本次仅更新文档说明，不包含运行时改造；`SCHEDULE_TIME` 仍仅影响本地内置调度（`python main.py --schedule`），`GitHub Actions` 的触发时点仍由 `00-daily-analysis.yml` 的固定 `cron` 决定（周一到周五 10:00 UTC / 北京18:00），未实现通过 Actions `SCHEDULE_TIME` 动态调整触发时间。
 
 ## [3.19.0] - 2026-05-29
 
