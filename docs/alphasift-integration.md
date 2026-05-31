@@ -92,6 +92,11 @@ PY
 
 若 AlphaSift 接口不兼容或自动安装失败，可将 `ALPHASIFT_ENABLED=false` 回退为关闭状态；已手动安装的包由运行环境自行管理。
 
+桌面端 / 无写权限环境说明：
+
+- `settings` 页点击“开启选股”会调用后端 `POST /api/v1/alphasift/install`，若安装时出现 `pip` 环境写入失败（如 `Permission denied`）或网络受限，后端会返回 `alphasift_install_failed`。
+- 前端会展示该错误信息；可在错误提示内引导用户手动在同一 Python 运行环境执行 `python -m pip install ...` 完成安装，或保持 `ALPHASIFT_ENABLED=false` 关闭选股能力继续使用历史流程。
+
 ## 接口
 
 ```text
