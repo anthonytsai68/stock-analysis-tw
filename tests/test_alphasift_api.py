@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import os
 import sys
+import threading
 import unittest
 from types import SimpleNamespace
+from typing import Any, Dict
 from unittest.mock import ANY, MagicMock, patch
 
 from fastapi import HTTPException
@@ -222,6 +224,53 @@ class AlphaSiftOpportunitiesApiTestCase(unittest.TestCase):
         install_mock.assert_called_once_with(config)
         self.assertEqual(payload["enabled"], True)
         self.assertEqual(payload["strategy_count"], 1)
+
+    def test_implicit_install_is_single_flight_across_concurrent_requests(self) -> None:
+        config = self._config(enabled=True)
+        request = self._request()
+        first_probe_barrier = threading.Barrier(2)
+        state_lock = threading.Lock()
+        state = {"available": False, "install_count": 0, "probe_count": 0}
+        errors: list[BaseException] = []
+
+        def is_available() -> bool:
+            with state_lock:
+                state["probe_count"] += 1
+                probe_count = state["probe_count"]
+                available = state["available"]
+            if probe_count <= 2:
+                first_probe_barrier.wait(timeout=2)
+                return False
+            return bool(available)
+
+        def install(_config: Config) -> Dict[str, Any]:
+            with state_lock:
+                state["install_count"] += 1
+                state["available"] = True
+            return {"installed": True}
+
+        def worker() -> None:
+            try:
+                alphasift_endpoint._ensure_alphasift_ready(config, request=request)
+            except BaseException as exc:
+                errors.append(exc)
+
+        with (
+            patch.dict(os.environ, {"DSA_DESKTOP_MODE": "true"}, clear=False),
+            patch("api.v1.endpoints.alphasift._is_alphasift_available", side_effect=is_available),
+            patch("api.v1.endpoints.alphasift._install_alphasift", side_effect=install) as install_mock,
+        ):
+            threads = [threading.Thread(target=worker), threading.Thread(target=worker)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join(timeout=3)
+
+        for thread in threads:
+            self.assertFalse(thread.is_alive())
+        self.assertEqual(errors, [])
+        self.assertEqual(state["install_count"], 1)
+        install_mock.assert_called_once_with(config)
 
     def test_screen_rejects_when_disabled(self) -> None:
         config = self._config(enabled=False)

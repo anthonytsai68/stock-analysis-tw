@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 ALPHASIFT_DSA_ADAPTER_MODULE = "alphasift.dsa_adapter"
 ALPHASIFT_EXPECTED_MISSING_MODULES = frozenset({"alphasift", ALPHASIFT_DSA_ADAPTER_MODULE})
 ALLOWED_ALPHASIFT_INSTALL_SPECS = frozenset({DEFAULT_ALPHASIFT_INSTALL_SPEC})
+_ALPHASIFT_INSTALL_LOCK = threading.RLock()
 _ALPHASIFT_RUNTIME_ENV_LOCK = threading.RLock()
 
 
@@ -92,58 +93,59 @@ def alphasift_install(
 
 
 def _install_alphasift(config: Config) -> Dict[str, Any]:
-    install_spec_is_default = _is_default_alphasift_install_spec(config.alphasift_install_spec)
-    if _is_alphasift_available():
-        _get_dsa_adapter()
-        return _build_install_response(
-            already_installed=True,
-            install_spec_is_default=install_spec_is_default,
-        )
+    with _ALPHASIFT_INSTALL_LOCK:
+        install_spec_is_default = _is_default_alphasift_install_spec(config.alphasift_install_spec)
+        if _is_alphasift_available():
+            _get_dsa_adapter()
+            return _build_install_response(
+                already_installed=True,
+                install_spec_is_default=install_spec_is_default,
+            )
 
-    install_spec = _validate_install_spec(config.alphasift_install_spec)
+        install_spec = _validate_install_spec(config.alphasift_install_spec)
 
-    try:
-        _purge_alphasift_modules()
+        try:
+            _purge_alphasift_modules()
+            importlib.invalidate_caches()
+            completed = subprocess.run(
+                [sys.executable, "-m", "pip", "install", "--upgrade", "--force-reinstall", install_spec],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
+        except Exception as exc:
+            raise HTTPException(
+                status_code=424,
+                detail={"error": "alphasift_install_failed", "message": f"自动安装 AlphaSift 失败：{exc}"},
+            ) from exc
+
+        if completed.returncode != 0:
+            stderr = (completed.stderr or "").strip()
+            stdout = (completed.stdout or "").strip()
+            detail = stderr or stdout or f"pip exited with code {completed.returncode}"
+            raise HTTPException(
+                status_code=424,
+                detail={
+                    "error": "alphasift_install_failed",
+                    "message": f"自动安装 AlphaSift 失败：{detail}",
+                },
+            )
+
         importlib.invalidate_caches()
-        completed = subprocess.run(
-            [sys.executable, "-m", "pip", "install", "--upgrade", "--force-reinstall", install_spec],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=300,
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=424,
-            detail={"error": "alphasift_install_failed", "message": f"自动安装 AlphaSift 失败：{exc}"},
-        ) from exc
+        _purge_alphasift_modules()
+        adapter_status = _call_alphasift_status()
+        if not _is_adapter_available(adapter_status):
+            raise HTTPException(
+                status_code=424,
+                detail={"error": "alphasift_unavailable", "message": "AlphaSift 安装完成，但适配层当前不可用（available=false）。请检查当前 Python 环境和安装状态后重试。"},
+            )
+        _get_dsa_adapter()
 
-    if completed.returncode != 0:
-        stderr = (completed.stderr or "").strip()
-        stdout = (completed.stdout or "").strip()
-        detail = stderr or stdout or f"pip exited with code {completed.returncode}"
-        raise HTTPException(
-            status_code=424,
-            detail={
-                "error": "alphasift_install_failed",
-                "message": f"自动安装 AlphaSift 失败：{detail}",
-            },
+        return _build_install_response(
+            already_installed=False,
+            install_spec_is_default=_is_default_alphasift_install_spec(install_spec),
         )
-
-    importlib.invalidate_caches()
-    _purge_alphasift_modules()
-    adapter_status = _call_alphasift_status()
-    if not _is_adapter_available(adapter_status):
-        raise HTTPException(
-            status_code=424,
-            detail={"error": "alphasift_unavailable", "message": "AlphaSift 安装完成，但适配层当前不可用（available=false）。请检查当前 Python 环境和安装状态后重试。"},
-        )
-    _get_dsa_adapter()
-
-    return _build_install_response(
-        already_installed=False,
-        install_spec_is_default=_is_default_alphasift_install_spec(install_spec),
-    )
 
 
 def _validate_install_spec(raw_install_spec: str) -> str:
@@ -243,8 +245,11 @@ def _ensure_alphasift_enabled(config: Config) -> None:
 def _ensure_alphasift_ready(config: Config, *, request: Request) -> None:
     if _is_alphasift_available():
         return
-    _ensure_alphasift_install_access(request)
-    _install_alphasift(config)
+    with _ALPHASIFT_INSTALL_LOCK:
+        if _is_alphasift_available():
+            return
+        _ensure_alphasift_install_access(request)
+        _install_alphasift(config)
 
 
 def _ensure_alphasift_install_access(request: Request) -> None:
