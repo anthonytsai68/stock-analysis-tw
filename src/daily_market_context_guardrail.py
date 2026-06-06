@@ -14,6 +14,8 @@ _CONSERVATIVE_TEXT_MARKERS_ZH = ("退潮", "观望", "高风险", "谨慎", "保
 _CONSERVATIVE_TEXT_MARKERS_EN = ("high risk", "risk-off", "risk off", "watch", "cautious", "conservative", "position cap")
 _AGGRESSIVE_BUY_MARKERS_ZH = ("立即买入", "马上买入", "积极买入", "激进买入", "追高", "加仓")
 _AGGRESSIVE_BUY_MARKERS_EN = ("buy now", "strong buy", "aggressive buy", "chase", "add aggressively")
+_NEGATION_HINTS_ZH = ("暂不", "不建议", "不应", "不宜", "不能", "无法", "不允许", "禁止", "避免", "未", "不要", "别", "先不")
+_NEGATION_HINTS_EN = (" not ", " do not ", "don't", "no ", "never", "avoid")
 
 
 def apply_daily_market_context_guardrail(
@@ -155,18 +157,31 @@ def _is_conservative_context(context: Any) -> bool:
 def _has_aggressive_buy_signal(result: Any, *, language: str) -> bool:
     decision_type = str(getattr(result, "decision_type", "") or "").lower()
     if decision_type == "buy":
-        return True
+        advice = str(getattr(result, "operation_advice", "") or "")
+        return not advice or _contains_any(advice, _buy_markers(language), language=language)
     advice = str(getattr(result, "operation_advice", "") or "")
-    return _contains_any(advice, _buy_markers(language))
+    return _contains_any(advice, _buy_markers(language), language=language)
 
 
 def _buy_markers(language: str) -> tuple[str, ...]:
     return _AGGRESSIVE_BUY_MARKERS_EN if language == "en" else _AGGRESSIVE_BUY_MARKERS_ZH
 
 
-def _contains_any(text: str, markers: tuple[str, ...]) -> bool:
+def _contains_any(text: str, markers: tuple[str, ...], *, language: str = "zh") -> bool:
     lowered = text.lower()
-    return any(marker.lower() in lowered for marker in markers)
+    negation_hints = _NEGATION_HINTS_ZH if language == "zh" else _NEGATION_HINTS_EN
+    for marker in markers:
+        marker_lower = marker.lower()
+        marker_pos = 0
+        while True:
+            marker_pos = lowered.find(marker_lower, marker_pos)
+            if marker_pos == -1:
+                break
+            context = lowered[max(0, marker_pos - 18):marker_pos]
+            if not any(hint in context for hint in negation_hints):
+                return True
+            marker_pos += len(marker_lower)
+    return False
 
 
 def _is_high_confidence(value: Any) -> bool:

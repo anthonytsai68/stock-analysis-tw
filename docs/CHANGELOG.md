@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - [修复] 桌面/镜像打包链路保持与运行时一致的 AlphaSift 适配层预置，避免 `pip install` 作为线上修复依赖。
 - [测试] 增补 AlphaSift runtime bridge 与打包脚本静态验证，覆盖 `LLM_CHANNELS`、`LITELLM_FALLBACK_MODELS`、`alphasift.dsa_adapter`、`--collect-all alphasift`。
 - [改进] #1381 个股分析新增按当日/市场复用的大盘环境摘要，普通 Pipeline 与 Agent 分析 Prompt 可读取低敏大盘背景，并在高风险/退潮环境下软化激进买入建议。
+- [文档] #1381 说明与实现范围对齐：本轮仅补齐后端上下文注入与保守护栏，不包含独立 API、Web 阶段结果独立展示、四阶段日报结构化持久化或新增日报状态表。
 
 ## [3.20.0] - 2026-06-03
 

@@ -486,6 +486,44 @@ def _refresh_stock_index_cache_for_analysis(config: Config) -> None:
         logger.warning("[stock-index] 分析前刷新股票索引失败，继续执行分析: %s", exc)
 
 
+def _prime_daily_market_context(
+    config: Config,
+    pipeline: Any,
+    *,
+    region: str,
+    no_market_review: bool,
+    allow_generate: bool,
+) -> str:
+    """Load/reuse today's market context for the run, avoiding unbounded background generation."""
+    if no_market_review or not region or not allow_generate:
+        return ""
+
+    from src.services.daily_market_context import DailyMarketContextService
+
+    service = getattr(pipeline, "_daily_market_context_service", None)
+    if service is None:
+        service = DailyMarketContextService(db_manager=pipeline.db)
+        pipeline._daily_market_context_service = service
+
+    context = service.get_context(
+        region=region,
+        config=config,
+        notifier=pipeline.notifier,
+        analyzer=pipeline.analyzer,
+        search_service=pipeline.search_service,
+        force_refresh=False,
+        allow_generate=allow_generate,
+    )
+    if context is None:
+        return ""
+
+    # Skip extra report generation when we already have historical context.
+    if context.source == "analysis_history":
+        return ""
+
+    return str(getattr(context, "summary", ""))
+
+
 def run_full_analysis(
     config: Config,
     args: argparse.Namespace,
@@ -540,19 +578,33 @@ def run_full_analysis(
         if getattr(args, 'no_context_snapshot', False):
             save_context_snapshot = False
         query_id = uuid.uuid4().hex
-        explicit_market_review_planned = (
+        market_review_region = (
+            effective_region
+            if effective_region is not None
+            else (getattr(config, 'market_review_region', 'cn') or 'cn')
+        )
+        should_generate_market_context = (
             config.market_review_enabled
             and not args.no_market_review
-            and effective_region != ''
+            and (market_review_region or '') != ''
         )
+        market_report = ""
         pipeline = StockAnalysisPipeline(
             config=config,
             max_workers=args.workers,
             query_id=query_id,
             query_source="cli",
             save_context_snapshot=save_context_snapshot,
-            daily_market_context_allow_generate=not explicit_market_review_planned,
+            daily_market_context_allow_generate=should_generate_market_context,
         )
+        if should_generate_market_context:
+            market_report = _prime_daily_market_context(
+                config,
+                pipeline=pipeline,
+                region=market_review_region,
+                no_market_review=args.no_market_review,
+                allow_generate=should_generate_market_context,
+            )
 
         # 1. 运行个股分析
         results = pipeline.run(
@@ -568,18 +620,19 @@ def run_full_analysis(
             analysis_delay > 0
             and config.market_review_enabled
             and not args.no_market_review
-            and effective_region != ''
+            and should_generate_market_context
         ):
             logger.info(f"等待 {analysis_delay} 秒后执行大盘复盘（避免API限流）...")
             time.sleep(analysis_delay)
 
         # 2. 运行大盘复盘（如果启用且不是仅个股模式）
-        market_report = ""
         if (
+            not market_report
+            and
             config.market_review_enabled
             and not args.no_market_review
-            and effective_region != ''
-        ):
+            and should_generate_market_context
+            ):
             review_result = _run_market_review_with_shared_lock(
                 config,
                 run_market_review,
@@ -588,7 +641,7 @@ def run_full_analysis(
                 search_service=pipeline.search_service,
                 send_notification=not args.no_notify,
                 merge_notification=merge_notification,
-                override_region=effective_region,
+                override_region=market_review_region,
             )
             # 如果有结果，赋值给 market_report 用于后续飞书文档生成
             if review_result:

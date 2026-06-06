@@ -107,6 +107,8 @@ P3 当时不持久化完整 pack，不新增 API/Web/Bot/Desktop 字段，不改
 
 #1381 在 AnalysisContextPack 之外新增一个小型每日大盘环境摘要通道，避免把 `market_review` / `market_light` 直接 pack 化。`StockAnalysisPipeline` 在 `MARKET_REVIEW_ENABLED=true` 时按个股市场（`cn` / `hk` / `us`）加载当日大盘上下文：优先复用 `analysis_history(code=MARKET, report_type=market_review)` 中同日同市场记录；没有同日记录时才调用 `run_market_review(..., return_structured=True, send_notification=False)` 生成本次上下文，且通过进程内 cache 避免同一 Pipeline 重复生成。
 
+**范围说明：**`#1381` 仅覆盖后端大盘上下文注入、每日上下文复用控制与保守护栏；本次变更不包含独立 API、Web 流水线阶段页、四阶段日报结构化存储或新增日报表状态字段。
+
 普通分析与 Agent 分析只接收低敏字段：`daily_market_context`（region、trade_date、summary、risk_tags、source、可选 position_cap）和 `daily_market_context_summary` Prompt 段，不传递完整 `market_review_payload`、原始新闻、密钥或通知配置。普通分析 Prompt 在市场阶段段落后、技术面数据前插入大盘摘要；Agent 单体与多 Agent 路径在 market phase 后、pre-fetched 数据前插入同一摘要。Agent 自由聊天只在调用方已经提供 `daily_market_context` / `daily_market_context_summary` 时注入，不为每次聊天自动触发大盘复盘。
 
 结果后处理新增保守大盘环境护栏：当摘要或标签显示 `high_risk`、`market_cooling`、`conservative`、`low_position_cap`，且模型给出 `buy` / 立即买入 / 追高 / 激进加仓等建议时，会把建议软化为观望或小仓等待确认，并把高置信度降为中等。该护栏只修改当次 `AnalysisResult` 与 dashboard 中的低敏限制说明，不新增数据库表或 API 字段。回滚方式为撤销 #1381 相关服务、Prompt 注入和 guardrail 代码，既有大盘复盘历史记录保持兼容。
