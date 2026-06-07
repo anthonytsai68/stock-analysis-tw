@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from src.core.market_review import MarketReviewRunResult
+from src.services import daily_market_context as daily_market_context_module
 from src.services.daily_market_context import (
     DailyMarketContextService,
     format_daily_market_context_prompt_section,
@@ -599,7 +600,7 @@ def test_get_context_skips_generation_when_market_review_lock_is_held() -> None:
         "src.services.daily_market_context.try_acquire_market_review_lock",
         return_value=None,
     ) as acquire_lock, \
-         patch("src.services.daily_market_context.time.sleep"), \
+         patch("src.services.daily_market_context.time.sleep") as sleep_mock, \
          patch("src.services.daily_market_context.release_market_review_lock") as release_lock, \
          patch("src.services.daily_market_context.run_market_review") as run_review:
         context = service.get_context(
@@ -612,7 +613,14 @@ def test_get_context_skips_generation_when_market_review_lock_is_held() -> None:
         )
 
     assert context is None
-    acquire_lock.assert_called_once()
+    assert acquire_lock.call_count == (
+        daily_market_context_module._MARKET_REVIEW_LOCK_WAIT_MAX_ATTEMPTS + 1
+    )
+    assert sleep_mock.call_count == (
+        daily_market_context_module._MARKET_REVIEW_LOCK_WAIT_MAX_ATTEMPTS - 1
+    )
+    total_wait_seconds = sum(call.args[0] for call in sleep_mock.call_args_list)
+    assert total_wait_seconds > 60
     release_lock.assert_not_called()
     run_review.assert_not_called()
 
@@ -652,10 +660,45 @@ def test_get_context_waits_for_market_review_generation_when_lock_is_held() -> N
     assert context.source == "analysis_history"
     assert context.summary == "市场退潮，高风险，建议观望，仓位上限30%。"
     assert sleep_mock.call_count >= 1
-    acquire_lock.assert_called_once()
+    assert acquire_lock.call_count == 4
     release_lock.assert_not_called()
     run_review.assert_not_called()
     assert db.get_analysis_history.call_count == 4
+
+
+def test_get_context_stops_waiting_after_market_review_lock_is_released_without_history() -> None:
+    db = MagicMock()
+    db.get_analysis_history.return_value = []
+    service = DailyMarketContextService(
+        db_manager=db,
+        today_fn=lambda: date(2026, 6, 6),
+    )
+    released_lock = object()
+
+    with patch(
+        "src.services.daily_market_context.time.sleep",
+    ) as sleep_mock, \
+         patch(
+            "src.services.daily_market_context.try_acquire_market_review_lock",
+            side_effect=[None, None, released_lock],
+        ) as acquire_lock, \
+         patch("src.services.daily_market_context.release_market_review_lock") as release_lock, \
+         patch("src.services.daily_market_context.run_market_review") as run_review:
+        context = service.get_context(
+            region="cn",
+            config=SimpleNamespace(report_language="zh"),
+            notifier=MagicMock(),
+            analyzer=MagicMock(),
+            search_service=MagicMock(),
+            force_refresh=True,
+        )
+
+    assert context is None
+    assert acquire_lock.call_count == 3
+    assert sleep_mock.call_count == 1
+    release_lock.assert_called_once_with(released_lock)
+    run_review.assert_not_called()
+    assert db.get_analysis_history.call_count == 3
 
 
 def test_readonly_mode_can_still_use_cached_history_without_generation() -> None:
