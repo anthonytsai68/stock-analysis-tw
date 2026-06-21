@@ -178,6 +178,39 @@ class ConfigManagerTestCase(unittest.TestCase):
             f"CUSTOM_WEBHOOK_BODY_TEMPLATE={template}\n",
         )
 
+    def test_non_template_settings_keep_dotenv_interpolation_semantics(self) -> None:
+        self.env_path.write_text(
+            "\n".join(
+                [
+                    "API_PORT=8000",
+                    "WEBUI_PORT=${API_PORT}",
+                    'CUSTOM_WEBHOOK_BODY_TEMPLATE={"content":$${content_json}}',
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+        config_map = self.manager.read_config_map()
+
+        self.assertEqual(config_map["API_PORT"], "8000")
+        self.assertEqual(config_map["WEBUI_PORT"], "8000")
+        self.assertEqual(
+            config_map["CUSTOM_WEBHOOK_BODY_TEMPLATE"],
+            '{"content":${content_json}}',
+        )
+
+        self.manager.apply_updates(
+            updates=[("WEBUI_PORT", config_map["WEBUI_PORT"])],
+            sensitive_keys=set(),
+            mask_token="******",
+        )
+
+        self.assertIn(
+            "WEBUI_PORT=${API_PORT}\n",
+            self.env_path.read_text(encoding="utf-8"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

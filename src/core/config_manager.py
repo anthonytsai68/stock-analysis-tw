@@ -130,7 +130,17 @@ class ConfigManager:
         if not self._env_path.exists():
             return {}
 
-        values = dotenv_values(self._env_path, interpolate=False)
+        raw_values = dotenv_values(self._env_path, interpolate=False)
+        if normalize_values:
+            values = dotenv_values(self._env_path)
+            for raw_key, raw_value in raw_values.items():
+                if (
+                    raw_key is not None
+                    and str(raw_key).upper() in _COMPOSE_ESCAPED_ENV_VALUE_KEYS
+                ):
+                    values[raw_key] = raw_value
+        else:
+            values = raw_values
         config_map: Dict[str, str] = {}
         for key, value in values.items():
             if key is None:
@@ -191,7 +201,10 @@ class ConfigManager:
                     key_upper,
                     value.replace("\n", ""),
                 )
-                if current_value == value and stored_value == canonical_stored_value:
+                if current_value == value and (
+                    key_upper not in _COMPOSE_ESCAPED_ENV_VALUE_KEYS
+                    or stored_value == canonical_stored_value
+                ):
                     continue
 
                 mutable_updates[key_upper] = value
