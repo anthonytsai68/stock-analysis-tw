@@ -17,8 +17,29 @@ from dotenv import dotenv_values
 
 _ASSIGNMENT_PATTERN = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$")
 _FALLBACK_REWRITE_ERRNOS = {errno.EBUSY, errno.EXDEV}
+_COMPOSE_ESCAPED_ENV_VALUE_KEYS = frozenset({"CUSTOM_WEBHOOK_BODY_TEMPLATE"})
+_APPLICATION_TEMPLATE_PLACEHOLDER_PATTERN = re.compile(
+    r"(?<!\$)\$(content_json|title_json|content|title)\b"
+)
+_ESCAPED_APPLICATION_TEMPLATE_PLACEHOLDER_PATTERN = re.compile(
+    r"\$\$(content_json|title_json|content|title)\b"
+)
 
 logger = logging.getLogger(__name__)
+
+
+def escape_compose_sensitive_env_value(key: str, value: str) -> str:
+    """Escape app template placeholders that Docker Compose would interpolate."""
+    if key.upper() not in _COMPOSE_ESCAPED_ENV_VALUE_KEYS:
+        return value
+    return _APPLICATION_TEMPLATE_PLACEHOLDER_PATTERN.sub(r"$$\1", value)
+
+
+def unescape_compose_sensitive_env_value(key: str, value: str) -> str:
+    """Restore app template placeholders escaped for Docker Compose storage."""
+    if key.upper() not in _COMPOSE_ESCAPED_ENV_VALUE_KEYS:
+        return value
+    return _ESCAPED_APPLICATION_TEMPLATE_PLACEHOLDER_PATTERN.sub(r"$\1", value)
 
 
 @dataclass
@@ -80,15 +101,27 @@ class ConfigManager:
 
     def read_config_map(self) -> Dict[str, str]:
         """Read key-value mapping from `.env` file."""
+        return self._read_config_map(normalize_values=True)
+
+    def _read_config_map(self, *, normalize_values: bool) -> Dict[str, str]:
+        """Read key-value mapping from `.env` file."""
         if not self._env_path.exists():
             return {}
 
         values = dotenv_values(self._env_path)
-        return {
-            str(key): "" if value is None else str(value)
-            for key, value in values.items()
-            if key is not None
-        }
+        config_map: Dict[str, str] = {}
+        for key, value in values.items():
+            if key is None:
+                continue
+            normalized_key = str(key)
+            normalized_value = "" if value is None else str(value)
+            if normalize_values:
+                normalized_value = unescape_compose_sensitive_env_value(
+                    normalized_key,
+                    normalized_value,
+                )
+            config_map[normalized_key] = normalized_value
+        return config_map
 
     def get_config_version(self) -> str:
         """Return deterministic version string based on file state."""
@@ -118,6 +151,7 @@ class ConfigManager:
         """Apply updates into `.env` file using atomic replace when possible."""
         with self._lock:
             current_values = self.read_config_map()
+            stored_values = self._read_config_map(normalize_values=False)
             mutable_updates: Dict[str, str] = {}
             skipped_masked: List[str] = []
 
@@ -130,7 +164,12 @@ class ConfigManager:
                         skipped_masked.append(key_upper)
                     continue
 
-                if current_value == value:
+                stored_value = stored_values.get(key_upper)
+                canonical_stored_value = escape_compose_sensitive_env_value(
+                    key_upper,
+                    value.replace("\n", ""),
+                )
+                if current_value == value and stored_value == canonical_stored_value:
                     continue
 
                 mutable_updates[key_upper] = value
@@ -147,6 +186,7 @@ class ConfigManager:
 
         for key, value in updates.items():
             line_value = value.replace("\n", "")
+            line_value = escape_compose_sensitive_env_value(key, line_value)
             if key in key_to_index:
                 entries[key_to_index[key]] = ConfigLineEntry.assignment(key, line_value)
             else:

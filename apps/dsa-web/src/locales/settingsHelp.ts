@@ -387,6 +387,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
     valueNotes: [
       '模板必须渲染为 JSON object。',
       '推荐使用 $content_json、$title_json 避免换行和引号破坏 JSON。',
+      'Docker 部署中保存到 .env 时会自动写成 $$content_json、$$title_json；运行时仍会还原为单个 $ 占位符。',
     ],
     impact: ['影响 AstrBot、NapCat、自建服务等自定义推送。'],
     notes: ['先用一个 Webhook 验证成功，再扩展到多个目标。'],
@@ -1383,7 +1384,11 @@ const settingsHelpEnUS: SettingsHelpMap = {
     title: 'Custom Webhooks',
     summary: 'Pushes reports to any service that accepts POST JSON.',
     usage: 'Use comma-separated URLs. CUSTOM_WEBHOOK_BODY_TEMPLATE can customize the JSON body.',
-    valueNotes: ['The template must render to a JSON object.', 'Prefer $content_json and $title_json to avoid invalid JSON.'],
+    valueNotes: [
+      'The template must render to a JSON object.',
+      'Prefer $content_json and $title_json to avoid invalid JSON.',
+      'Docker saves these placeholders as $$content_json / $$title_json in .env, and runtime restores the single-$ form.',
+    ],
     impact: ['Affects AstrBot, NapCat, or self-hosted push integrations.'],
     notes: ['Validate one webhook before adding multiple targets.'],
   },
