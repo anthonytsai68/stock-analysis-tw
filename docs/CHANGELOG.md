@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - [修复] Docker 镜像预置 efinance 缓存目录（efinance/data）属主给非 root 运行用户 dsa，修复 A 股 efinance 数据源因写 search-cache.json 触发 PermissionError 而每次抓取失败降级的问题。
 - [修复] Docker 部署中 Web 设置页保存自定义 Webhook 模板时自动转义 `$content_json` 等应用占位符，并在运行时还原，避免 Compose 重新部署将其展开为空。
 - [修复] 修复 Web 回测运行未传分析日期范围、股票代码未归一化导致后端成功返回但结果为空的问题，并为空候选和行情不足返回诊断信息。
-- [文档] 同步更新 `docs/full-guide.md` 与 `docs/full-guide_EN.md` 的回测 API 行为说明（分析日期范围参数、空结果诊断返回、`400 invalid_params` 语义），并补齐对应示例；仓储筛选/归一化链路变更同步在 `src/repositories/backtest_repo.py`，涉及文件范围为 `api/v1/endpoints/backtest.py`、`api/v1/schemas/backtest.py`、`apps/dsa-web/src/api/backtest.ts`、`apps/dsa-web/src/index.css`、`apps/dsa-web/src/pages/BacktestPage.tsx`、`apps/dsa-web/src/pages/__tests__/BacktestPage.test.tsx`、`apps/dsa-web/src/types/backtest.ts`、`docs/full-guide.md`、`docs/full-guide_EN.md`、`src/repositories/backtest_repo.py`、`src/services/backtest_service.py`、`tests/test_backtest_service.py`。
+- [文档] 同步更新 `docs/full-guide.md` 与 `docs/full-guide_EN.md` 的回测 API 行为说明（分析日期范围参数、空结果诊断返回、`400 invalid_params` 语义），并补齐对应示例；仓储筛选/归一化链路变更同步在 `src/repositories/backtest_repo.py`，本次补丁为 13 文件（+541/-27），涉及文件范围为 `api/v1/endpoints/backtest.py`、`api/v1/schemas/backtest.py`、`apps/dsa-web/src/api/backtest.ts`、`apps/dsa-web/src/index.css`、`apps/dsa-web/src/pages/BacktestPage.tsx`、`apps/dsa-web/src/pages/__tests__/BacktestPage.test.tsx`、`apps/dsa-web/src/types/backtest.ts`、`docs/full-guide.md`、`docs/full-guide_EN.md`、`src/repositories/backtest_repo.py`、`src/services/backtest_service.py`、`tests/test_backtest_service.py`。
 
 ## [3.23.0] - 2026-06-20
 
