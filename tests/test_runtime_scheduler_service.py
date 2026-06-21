@@ -92,6 +92,24 @@ class RuntimeSchedulerServiceTestCase(unittest.TestCase):
         self.assertTrue(hasattr(seen_args[0], "workers"))
         self.assertIsNone(seen_args[0].workers)
 
+    def test_default_runner_does_not_mark_failed_analysis_return_success(self) -> None:
+        config = SimpleNamespace(
+            schedule_enabled=True,
+            schedule_time="18:00",
+            schedule_times=["18:00"],
+        )
+        service = RuntimeSchedulerService(config_provider=lambda: config)
+        service._reload_config = lambda: config
+
+        with patch("main.run_full_analysis", return_value=False) as run_full_analysis:
+            service._run_analysis_once()
+
+        run_full_analysis.assert_called_once()
+        self.assertTrue(run_full_analysis.call_args.kwargs["raise_errors"])
+        status = service.status()
+        self.assertIsNone(status["last_success_at"])
+        self.assertIn("reported failure", status["last_error"])
+
     def test_reconcile_replaces_daily_jobs_without_triggering_old_jobs(self) -> None:
         fake_schedule = _FakeScheduleModule()
         config = SimpleNamespace(

@@ -638,8 +638,10 @@ def _save_reused_market_review_report(
 def run_full_analysis(
     config: Config,
     args: argparse.Namespace,
-    stock_codes: Optional[List[str]] = None
-):
+    stock_codes: Optional[List[str]] = None,
+    *,
+    raise_errors: bool = False,
+) -> bool:
     """
     执行完整的分析流程（个股 + 大盘复盘）
 
@@ -666,7 +668,7 @@ def run_full_analysis(
             logger.info(
                 "今日所有相关市场均为非交易日，跳过执行。可使用 --force-run 强制执行。"
             )
-            return
+            return True
         if set(filtered_codes) != set(effective_codes):
             skipped = set(effective_codes) - set(filtered_codes)
             logger.info("今日休市股票已跳过: %s", skipped)
@@ -964,8 +966,22 @@ def run_full_analysis(
         except Exception as e:
             logger.warning(f"自动回测失败（已忽略）: {e}")
 
+        return True
+
     except Exception as e:
         logger.exception(f"分析流程执行失败: {e}")
+        if raise_errors:
+            raise
+        return False
+
+
+def run_scheduled_analysis(
+    config: Config,
+    args: argparse.Namespace,
+    stock_codes: Optional[List[str]] = None,
+) -> bool:
+    """Run scheduled analysis with failures propagated to the scheduler."""
+    return run_full_analysis(config, args, stock_codes, raise_errors=True)
 
 
 def start_api_server(host: str, port: int, config: Config) -> None:

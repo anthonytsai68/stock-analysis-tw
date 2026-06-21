@@ -24,7 +24,7 @@ class RuntimeSchedulerService:
         self,
         *,
         config_provider: Callable[[], Config] = get_config,
-        task_runner: Optional[Callable[[Config, Any, Optional[List[str]]], None]] = None,
+        task_runner: Optional[Callable[[Config, Any, Optional[List[str]]], Any]] = None,
         owns_schedule: Optional[bool] = None,
     ) -> None:
         self._config_provider = config_provider
@@ -82,11 +82,13 @@ class RuntimeSchedulerService:
             config = self._reload_config()
             runner = self._task_runner
             if runner is None:
-                from main import run_full_analysis
+                from main import run_scheduled_analysis
 
-                runner = run_full_analysis
+                runner = run_scheduled_analysis
             self._last_run_at = datetime.now().isoformat()
-            runner(config, self._make_schedule_args(), None)
+            result = runner(config, self._make_schedule_args(), None)
+            if result is False:
+                raise RuntimeError("runtime scheduled analysis reported failure")
             self._last_success_at = datetime.now().isoformat()
             self._last_error = None
         except Exception as exc:  # noqa: BLE001 - scheduled runs must not kill API process.
