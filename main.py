@@ -1006,19 +1006,51 @@ def start_api_server(host: str, port: int, config: Config) -> None:
     finally:
         probe.close()
 
+    level_name = (config.log_level or "INFO").lower()
+    uvicorn_config = uvicorn.Config(
+        "api.app:app",
+        host=host,
+        port=port,
+        log_level=level_name,
+        log_config=None,
+    )
+    uvicorn_server = uvicorn.Server(config=uvicorn_config)
+    uvicorn_server.install_signal_handlers = False
+
+    startup_error: list[BaseException] = []
+
     def run_server():
-        level_name = (config.log_level or "INFO").lower()
-        uvicorn.run(
-            "api.app:app",
-            host=host,
-            port=port,
-            log_level=level_name,
-            log_config=None,
-        )
+        try:
+            uvicorn_server.run()
+        except Exception as exc:  # noqa: BLE001 - surface startup issues to caller promptly
+            startup_error.append(exc)
 
     thread = threading.Thread(target=run_server, daemon=True)
     thread.start()
-    logger.info(f"FastAPI 服务已启动: http://{host}:{port}")
+
+    timeout_seconds = 3.0
+    wait_deadline = time.time() + timeout_seconds
+    while time.time() < wait_deadline:
+        if startup_error:
+            raise RuntimeError(
+                f"FastAPI server failed to start: {host}:{port}; {startup_error[0]}"
+            )
+        if uvicorn_server.started:
+            logger.info(f"FastAPI 服务已启动: http://{host}:{port}")
+            return
+        if not thread.is_alive():
+            break
+        time.sleep(0.05)
+
+    if startup_error:
+        raise RuntimeError(f"FastAPI server failed to start: {host}:{port}; {startup_error[0]}")
+    if uvicorn_server.started:
+        logger.info(f"FastAPI 服务已启动: http://{host}:{port}")
+        return
+    if not thread.is_alive():
+        raise RuntimeError(f"FastAPI 服务器启动后立即退出: {host}:{port}")
+
+    raise RuntimeError(f"FastAPI 服务在 {timeout_seconds:.1f}s 内未完成启动: {host}:{port}")
 
 
 def _is_truthy_env(var_name: str, default: str = "true") -> bool:

@@ -146,6 +146,41 @@ class MainScheduleModeTestCase(unittest.TestCase):
         self.assertIn("127.0.0.1:8000", str(caught.exception))
         thread_cls.assert_not_called()
 
+    def test_start_api_server_fails_when_uvicorn_background_startup_fails(self) -> None:
+        config = self._make_config(log_level="INFO")
+
+        class _FakeUvicornServer:
+            def __init__(self, config):
+                self.config = config
+                self.started = False
+
+            def run(self) -> None:
+                raise RuntimeError("lifespan bootstrap failed")
+
+        class _FakeUvicornConfig:
+            def __init__(self, *args, **kwargs):
+                pass
+
+        class _FakeUvicornModule:
+            Config = _FakeUvicornConfig
+
+            Server = _FakeUvicornServer
+
+        class _UnusedSocket:
+            def bind(self, address):
+                pass
+
+            def close(self):
+                pass
+
+        with patch("socket.socket", return_value=_UnusedSocket()), \
+             patch.dict("sys.modules", {"uvicorn": _FakeUvicornModule()}):
+
+            with self.assertRaises(RuntimeError) as caught:
+                main.start_api_server("127.0.0.1", 8000, config)
+
+        self.assertIn("lifespan bootstrap failed", str(caught.exception))
+
     def test_schedule_mode_ignores_cli_stock_snapshot(self) -> None:
         args = self._make_args(schedule=True, stocks="600519,000001")
         config = self._make_config(schedule_enabled=False)
