@@ -795,6 +795,17 @@ def _should_return_eastmoney_hotspot_unavailable(provider_arg: Any, exc: BaseExc
     return isinstance(provider_arg, DsaEastMoneyHotspotProvider) and _is_known_eastmoney_hotspot_connectivity_error(exc)
 
 
+def _has_degraded_eastmoney_hotspot_failure(provider_arg: Any, source_errors: List[str]) -> bool:
+    if not isinstance(provider_arg, DsaEastMoneyHotspotProvider):
+        return False
+    for source_error in source_errors:
+        if source_error == DSA_ALPHASIFT_HOTSPOT_UNAVAILABLE_CODE:
+            return True
+        if _is_known_eastmoney_hotspot_connectivity_error(RuntimeError(source_error)):
+            return True
+    return False
+
+
 class AlphaSiftStrategyResponse(BaseModel):
     id: str
     name: str = ""
@@ -914,7 +925,7 @@ class AlphaSiftService:
         if not isinstance(items, list):
             items = []
         selected = items[:top_count]
-        source_errors = list(getattr(raw, "source_errors", []) or [])
+        source_errors = _list_text_values(getattr(raw, "source_errors", []))
         direct_hotspot_fallback_used = False
         if isinstance(provider_arg, DsaEastMoneyHotspotProvider) and _hotspot_rows_are_thin(selected, top=top_count):
             try:
@@ -938,6 +949,13 @@ class AlphaSiftService:
                 cached["fallback_used"] = True
                 cached["cache_used"] = True
                 return _attach_cached_hotspot_details(cached, provider=provider_name, top=top_count) if include_details else cached
+            if _has_degraded_eastmoney_hotspot_failure(provider_arg, source_errors):
+                return _empty_alphasift_hotspot_payload(
+                    provider=provider_name,
+                    provider_used=str(getattr(raw, "provider_used", "") or type(provider_arg).__name__),
+                    source_errors=[DSA_ALPHASIFT_HOTSPOT_UNAVAILABLE_CODE],
+                    message=DSA_ALPHASIFT_HOTSPOT_UNAVAILABLE_MESSAGE,
+                )
 
         payload = {
             "enabled": True,

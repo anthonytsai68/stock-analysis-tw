@@ -588,6 +588,44 @@ class AlphaSiftOpportunitiesApiTestCase(unittest.TestCase):
         self.assertNotIn("RemoteDisconnected", payload["message"])
         discover.assert_called_once()
 
+    def test_hotspots_default_refresh_degraded_eastmoney_failure_without_cache_returns_friendly_empty_payload(self) -> None:
+        config = self._config(enabled=True)
+
+        class HotspotRows(list):
+            provider_used = "DsaEastMoneyHotspotProvider"
+            fallback_used = False
+            source_errors = ["RemoteDisconnected('Remote end closed connection without response')"]
+            stale = False
+            stale_age_hours = None
+
+        discover = MagicMock(return_value=HotspotRows())
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            cache_path = Path(tmpdir) / "missing-hotspots.json"
+            app = FastAPI()
+            app.include_router(alphasift_endpoint.router, prefix="/api/v1/alphasift")
+            app.dependency_overrides[alphasift_endpoint.get_config_dep] = lambda: config
+            with (
+                patch.dict(os.environ, {"INDUSTRY_PROVIDER": ""}, clear=False),
+                patch("src.services.alphasift_service.DSA_ALPHASIFT_HOTSPOT_CACHE_PATH", cache_path),
+                patch("src.services.alphasift_service._get_alphasift_status_snapshot", return_value=({}, True, {})),
+                patch("src.services.alphasift_service.DsaEastMoneyHotspotProvider.hotspot_rows", return_value=[]),
+                patch("src.services.alphasift_service._import_alphasift_hotspot", return_value=SimpleNamespace(discover_hotspots=discover)),
+            ):
+                response = TestClient(app).get("/api/v1/alphasift/hotspots?refresh=true&top=1")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+
+        self.assertEqual(payload["provider"], "akshare")
+        self.assertEqual(payload["provider_used"], "DsaEastMoneyHotspotProvider")
+        self.assertEqual(payload["hotspots"], [])
+        self.assertEqual(payload["hotspot_count"], 0)
+        self.assertEqual(payload["source_errors"], ["eastmoney_hotspot_unavailable"])
+        self.assertEqual(payload["message"], "热点源连接中断，暂无可用缓存。")
+        self.assertNotIn("RemoteDisconnected", payload["message"])
+        discover.assert_called_once()
+
     def test_hotspots_refresh_runtime_failure_without_cache_raises_integration_error(self) -> None:
         config = self._config(enabled=True)
         discover = MagicMock(side_effect=RuntimeError("adapter contract returned invalid payload"))
