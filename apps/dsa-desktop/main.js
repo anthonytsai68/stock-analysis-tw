@@ -757,6 +757,25 @@ function findAvailablePort(startPort = 8000, endPort = 8100) {
   });
 }
 
+function formatHealthProbeFailure(failure) {
+  if (!failure) {
+    return '';
+  }
+
+  const attemptSuffix = failure.attempts ? ` on attempt ${failure.attempts}` : '';
+  if (failure.type === 'status') {
+    return `last probe returned HTTP status ${failure.statusCode}${attemptSuffix}`;
+  }
+  if (failure.type === 'timeout') {
+    return `last probe timed out after ${failure.requestTimeoutMs}ms${attemptSuffix}`;
+  }
+  if (failure.type === 'error') {
+    return `last probe error ${failure.errorCode}: ${failure.errorMessage}${attemptSuffix}`;
+  }
+
+  return '';
+}
+
 function waitForHealth(
   url,
   timeoutMs = 60000,
@@ -767,6 +786,7 @@ function waitForHealth(
 ) {
   const start = Date.now();
   let attempts = 0;
+  let lastProbeFailure = null;
 
   return new Promise((resolve, reject) => {
     let settled = false;
@@ -842,13 +862,17 @@ function waitForHealth(
 
       const elapsedMs = Date.now() - start;
       if (elapsedMs > timeoutMs) {
+        const lastFailureDetail = formatHealthProbeFailure(lastProbeFailure);
         emitProgress({
           type: 'total_timeout',
           elapsedMs,
           attempts,
           timeoutMs,
+          lastFailureDetail,
         });
-        finish(new Error(`Health check timeout after ${elapsedMs}ms`));
+        finish(new Error(
+          `Health check timeout after ${elapsedMs}ms${lastFailureDetail ? `; ${lastFailureDetail}` : ''}`
+        ));
         return;
       }
 
@@ -876,6 +900,11 @@ function waitForHealth(
           return;
         }
 
+        lastProbeFailure = {
+          type: 'status',
+          statusCode: res.statusCode,
+          attempts,
+        };
         emitProgress({
           type: 'probe_status',
           elapsedMs: Date.now() - start,
@@ -886,6 +915,11 @@ function waitForHealth(
       });
 
       activeRequest.setTimeout(requestTimeoutMs, () => {
+        lastProbeFailure = {
+          type: 'timeout',
+          requestTimeoutMs,
+          attempts,
+        };
         emitProgress({
           type: 'probe_timeout',
           elapsedMs: Date.now() - start,
@@ -900,13 +934,27 @@ function waitForHealth(
           return;
         }
 
-        emitProgress({
-          type: 'probe_error',
-          elapsedMs: Date.now() - start,
-          attempts,
-          errorCode: error.code || 'unknown',
-          errorMessage: error.message,
-        });
+        const isSyntheticRequestTimeout =
+          lastProbeFailure &&
+          lastProbeFailure.type === 'timeout' &&
+          lastProbeFailure.attempts === attempts &&
+          error.message === `Health probe request timeout after ${requestTimeoutMs}ms`;
+
+        if (!isSyntheticRequestTimeout) {
+          lastProbeFailure = {
+            type: 'error',
+            errorCode: error.code || 'unknown',
+            errorMessage: error.message,
+            attempts,
+          };
+          emitProgress({
+            type: 'probe_error',
+            elapsedMs: Date.now() - start,
+            attempts,
+            errorCode: error.code || 'unknown',
+            errorMessage: error.message,
+          });
+        }
         scheduleNext();
       });
     };
@@ -1740,6 +1788,7 @@ module.exports = {
   restorePackagedRuntimeStateFromBackup,
   sanitizeReleaseUrl,
   stopBackend,
+  waitForHealth,
   __getBackendProcessForTest() {
     return backendProcess;
   },

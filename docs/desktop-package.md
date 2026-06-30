@@ -282,6 +282,7 @@ win-unpacked/
 1. 检查 `logs/desktop.log` 查看错误信息
 2. 确认 `.env` 文件存在且配置正确
 3. 确认端口 8000-8100 未被占用
+4. 如果看到 `Health check timeout after ...`，同时查看错误后的 `last probe ...` 详情：`HTTP status` 通常表示后端已响应但健康接口异常，`ECONNREFUSED` 通常表示后端端口尚未监听，`timed out after` 通常表示健康接口单次请求无响应
 
 ### 后端启动报 ModuleNotFoundError
 

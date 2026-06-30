@@ -136,6 +136,89 @@ test('buildMainPageUrl includes desktop version and cache buster', (t) => {
   );
 });
 
+test('waitForHealth timeout includes last non-200 status', async (t) => {
+  const fakeHttp = {
+    get: (_url, onResponse) => {
+      const req = new EventEmitter();
+      req.destroyed = false;
+      req.setTimeout = () => undefined;
+      req.destroy = () => {
+        req.destroyed = true;
+      };
+
+      process.nextTick(() => {
+        const res = new EventEmitter();
+        res.statusCode = 503;
+        res.resume = () => undefined;
+        onResponse(res);
+      });
+
+      return req;
+    },
+  };
+  const mainModule = loadMainModule(t, { http: fakeHttp });
+
+  await assert.rejects(
+    mainModule.waitForHealth('http://127.0.0.1:8123/api/health', 5, 1, 2),
+    /Health check timeout after \d+ms; last probe returned HTTP status 503 on attempt \d+/
+  );
+});
+
+test('waitForHealth timeout includes last probe connection error', async (t) => {
+  const fakeHttp = {
+    get: () => {
+      const req = new EventEmitter();
+      req.destroyed = false;
+      req.setTimeout = () => undefined;
+      req.destroy = () => {
+        req.destroyed = true;
+      };
+
+      process.nextTick(() => {
+        const error = new Error('connect ECONNREFUSED 127.0.0.1:8123');
+        error.code = 'ECONNREFUSED';
+        req.emit('error', error);
+      });
+
+      return req;
+    },
+  };
+  const mainModule = loadMainModule(t, { http: fakeHttp });
+
+  await assert.rejects(
+    mainModule.waitForHealth('http://127.0.0.1:8123/api/health', 5, 1, 2),
+    /Health check timeout after \d+ms; last probe error ECONNREFUSED: connect ECONNREFUSED 127\.0\.0\.1:8123 on attempt \d+/
+  );
+});
+
+test('waitForHealth timeout preserves last probe request timeout', async (t) => {
+  const fakeHttp = {
+    get: () => {
+      const req = new EventEmitter();
+      req.destroyed = false;
+      req.setTimeout = (_timeoutMs, onTimeout) => {
+        process.nextTick(onTimeout);
+      };
+      req.destroy = (error) => {
+        req.destroyed = true;
+        if (error) {
+          process.nextTick(() => {
+            req.emit('error', error);
+          });
+        }
+      };
+
+      return req;
+    },
+  };
+  const mainModule = loadMainModule(t, { http: fakeHttp });
+
+  await assert.rejects(
+    mainModule.waitForHealth('http://127.0.0.1:8123/api/health', 5, 1, 2),
+    /Health check timeout after \d+ms; last probe timed out after 2ms on attempt \d+/
+  );
+});
+
 test('extractReleaseMetadata ignores releases without semver tags', (t) => {
   const mainModule = loadMainModule(t);
 
