@@ -1835,6 +1835,7 @@ def populate_decision_action_fields(
     explicit_action: Any = None,
     report_type: Any = None,
     use_existing_action: bool = True,
+    align_with_score: bool = True,
 ) -> AnalysisResult:
     """Populate optional decision action fields without changing legacy advice."""
 
@@ -1849,7 +1850,7 @@ def populate_decision_action_fields(
         report_language=getattr(result, "report_language", "zh"),
         sentiment_score=getattr(result, "sentiment_score", None),
         guardrail_reason=getattr(result, "guardrail_reason", None),
-        align_with_score=True,
+        align_with_score=align_with_score,
     )
     result.action = fields["action"]
     result.action_label = fields["action_label"]
@@ -4543,7 +4544,11 @@ class GeminiAnalyzer:
                     report_language, en='Technical data', zh='技术面数据', ko='기술적 데이터')),
                 success=True,
             )
-            return populate_decision_action_fields(result, explicit_action=explicit_action)
+            return populate_decision_action_fields(
+                result,
+                explicit_action=explicit_action,
+                align_with_score=False,
+            )
                 
         except json.JSONDecodeError as e:
             logger.warning(f"JSON 解析失败: {e}，标记为解析失败")
@@ -4676,7 +4681,7 @@ class GeminiAnalyzer:
             error_message='LLM response is not valid JSON; analysis result will not be persisted',
             report_language=report_language,
         )
-        return populate_decision_action_fields(result)
+        return populate_decision_action_fields(result, align_with_score=False)
     
     def batch_analyze(
         self, 
