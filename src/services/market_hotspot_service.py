@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_RANKING_FETCH_TIMEOUT_SECONDS = 3.0
 DEFAULT_RANKING_CACHE_FAILURE_TTL_SECONDS = 30.0
+DEFAULT_RANKING_CACHE_SUCCESS_TTL_SECONDS = 60.0
 
 
 class MarketHotspotService:
@@ -43,6 +44,7 @@ class MarketHotspotService:
         fetcher_manager: Optional[DataFetcherManager] = None,
         ranking_fetch_timeout_seconds: Optional[float] = None,
         failure_cache_ttl_seconds: Optional[float] = None,
+        success_cache_ttl_seconds: Optional[float] = None,
     ) -> None:
         self.fetcher_manager = fetcher_manager or DataFetcherManager()
         self._ranking_fetch_timeout_seconds = ranking_fetch_timeout_seconds
@@ -50,6 +52,11 @@ class MarketHotspotService:
             DEFAULT_RANKING_CACHE_FAILURE_TTL_SECONDS
             if failure_cache_ttl_seconds is None
             else failure_cache_ttl_seconds
+        )
+        self._success_cache_ttl_seconds = self._coerce_cache_ttl(
+            DEFAULT_RANKING_CACHE_SUCCESS_TTL_SECONDS
+            if success_cache_ttl_seconds is None
+            else success_cache_ttl_seconds
         )
         self._hotspots_cache: Dict[
             Tuple[str, Optional[str], int],
@@ -257,7 +264,10 @@ class MarketHotspotService:
         payload: Dict[str, Any],
     ) -> Dict[str, Any]:
         if payload.get("status") == "ok":
-            expires_at = None
+            success_ttl = self._success_cache_ttl_seconds
+            if success_ttl <= 0:
+                return copy.deepcopy(payload)
+            expires_at = time.time() + success_ttl
         else:
             status_error = payload.get("data_quality", {}).get("errors", [])
             has_missing = bool(payload.get("data_quality", {}).get("missing_fields", []))

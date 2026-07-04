@@ -150,6 +150,21 @@ def test_market_hotspot_service_caches_rankings_per_instance() -> None:
     assert fetcher.concept_calls == 1
 
 
+def test_market_hotspot_service_refreshes_cached_ok_after_ttl() -> None:
+    fetcher = _FakeFetcherManager()
+    service = MarketHotspotService(
+        fetcher_manager=fetcher,
+        success_cache_ttl_seconds=0.02,
+    )
+
+    service.get_hotspots(market="cn", trade_date="2026-07-04")
+    time.sleep(0.05)
+    service.get_hotspots(market="cn", trade_date="2026-07-04")
+
+    assert fetcher.sector_calls == 2
+    assert fetcher.concept_calls == 2
+
+
 def test_market_hotspot_service_fails_open_when_rankings_unavailable() -> None:
     service = MarketHotspotService(fetcher_manager=_FakeFetcherManager(fail=True))
 
