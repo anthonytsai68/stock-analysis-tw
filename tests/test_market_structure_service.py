@@ -115,6 +115,41 @@ class _EmptyHotspotService:
         }
 
 
+class _SourceConflictHotspotService:
+    def get_hotspots(
+        self,
+        *,
+        market: str,
+        trade_date=None,
+        limit: int = 5,
+        sector_rankings=None,
+        concept_rankings=None,
+    ):
+        return {
+            "status": "ok",
+            "market": market,
+            "trade_date": trade_date,
+            "active_themes": [],
+            "leading_industries": [
+                {
+                    "name": "新能源",
+                    "rank": 5,
+                    "change_pct": 2.0,
+                    "source": "industry",
+                },
+            ],
+            "leading_concepts": [
+                {
+                    "name": "新能源",
+                    "rank": 1,
+                    "change_pct": 10.0,
+                    "source": "concept",
+                },
+            ],
+            "lagging_themes": [],
+        }
+
+
 class _BlockingRankingFetcherManager:
     def __init__(self) -> None:
         self.release = threading.Event()
@@ -544,6 +579,47 @@ def test_market_structure_service_prefers_ranked_related_board_fallback() -> Non
     assert position["status"] == "ok"
     assert position["primary_theme"]["name"] == "机器人概念"
     assert position["primary_theme"]["rank"] == 3
+    assert "theme_ranking_match" not in position["missing_fields"]
+
+
+def test_market_structure_service_prefers_board_source_for_primary_theme() -> None:
+    service = MarketStructureService(
+        fetcher_manager=_FakeFetcherManager(),
+        hotspot_service=_SourceConflictHotspotService(),
+    )
+    fundamental_context = {
+        "market": "cn",
+        "belong_boards": [{"name": "新能源", "type": "行业"}],
+        "concept_boards": {
+            "status": "ok",
+            "data": {
+                "top": [],
+                "bottom": [],
+            },
+        },
+        "boards": {
+            "status": "ok",
+            "data": {
+                "top": [],
+                "bottom": [],
+            },
+        },
+    }
+
+    context = service.build_context(
+        code="000001",
+        stock_name="新能源相关股",
+        market="cn",
+        fundamental_context=fundamental_context,
+        trade_date="2026-07-04",
+    )
+
+    position = context["stock_market_position"]
+    assert position["primary_theme"]["name"] == "新能源"
+    assert position["primary_theme"]["source"] == "industry"
+    assert position["primary_theme"]["change_pct"] == 2.0
+    assert position["primary_theme"]["phase"] == "warming"
+    assert position["stock_role"] == "follower"
     assert "theme_ranking_match" not in position["missing_fields"]
 
 

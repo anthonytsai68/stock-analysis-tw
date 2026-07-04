@@ -370,6 +370,12 @@ class MarketStructureService:
             if not name or name not in related_names:
                 continue
             source = self._theme_source(item.get("source"))
+            if source in {"concept", "industry"}:
+                if not any(
+                    board.name == name and board.source == source
+                    for board in related_boards
+                ):
+                    continue
             phase = self._theme_phase(item.get("phase"))
             if phase == "unknown":
                 phase = self._phase_from_change(self._safe_float(item.get("change_pct")))
