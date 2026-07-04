@@ -134,6 +134,12 @@ python -m pytest -m "not network"
   - 判定结果：`true-impact` 或 `false-positive`
   - 对应回滚方案（误报可写“无 runtime 变更，revert 本 PR 即可”）
   - 若为误报，请给出无配置迁移/无路由变更的可核验依据（如未修改 config registry、路由入口、迁移脚本等）。
+  - 建议按如下模板直接复用（便于审查回溯）：
+    - 风险来源：`<tools/rule-id>`
+    - 命中路径：`<文件路径1> -> <调用路径>`
+    - 证据链：`<未改 config registry / 未改迁移脚本 / 仅快照字段> + <复现命令或日志>`
+    - 判定：`false-positive / true-impact`
+    - 回滚：`revert 本 PR`
 - 若本 PR 未触及第三方模型/API、provider/model/base URL 或运行时配置保存/清理/迁移逻辑，请在此段直接按以下文案确认（无须再次展开）：  
   `本 PR 未变更 provider/model/base URL、运行时配置清理迁移语义；历史配置保持不变；回滚方式为 revert 本提交。`
 - 若本 PR 修改 `.github/PULL_REQUEST_TEMPLATE.md` / PR 流程模板类文件，请在此明确：仅影响协作流程与模板维护，不改 runtime 行为；回退方式为 revert；并补充是否影响自动化提交流程。  
