@@ -49,7 +49,9 @@ git diff --name-only "$BASE_REF"..HEAD
   - 对以下高风险文件类别需逐项强制逐条列出且逐项覆盖后再提交（无则请写 `未命中`）：
     - `api/v1/**`、`src/services/decision_signal_service.py`、`docs/architecture/api_spec.json`
     - `tests/**`、`docs/**`、治理/流程类文件（`.github/**`、`AGENTS.md`、`CLAUDE.md`、`.github/instructions/**`）
-- 必须同时给出 `Head`/`Base` 的原始值：
+  - 不能用目录摘要代替文件路径（例如不得用 `src/services` 代替 `src/services/decision_signal_service.py`）。
+  - 若本 PR 修改了 `src/services/decision_signal_service.py`、`docs/architecture/api_spec.json`、`.github/PULL_REQUEST_TEMPLATE.md`、`tests/**`，请在清单中逐项写明。
+  - 必须同时给出 `Head`/`Base` 的原始值：
   - Head：`git rev-parse --short HEAD`
   - Base：`git merge-base HEAD origin/main`
 - 补充要求（流程/可追溯性）：
@@ -147,6 +149,9 @@ python -m pytest -m "not network"
   - 旧配置/迁移可证伪点：`<示例：未改 config registry / 未改 migration 脚本 / 未改 OpenAI-compatible 路由>`
   - 官方来源或公告（若涉及协议/边界变更）：`<URL>`
   - 判定结论：`false-positive` / `true-impact`
+  - 若命中为 `provider`、`model`、`base URL`、`model_used`、`market_structure_context` 的快照字段，应在本段明确写明：
+    - 仅用于历史回溯/展示/脱敏链路，不参与运行时 provider 路由、模型选择或配置迁移。
+    - 对应未改路径（如 `src/analyzer.py` 路由、`src/services/system_config_service.py` 持久化、`src/storage/migrations/**`）与回退方式（通常 `revert`）。
   - 受影响 runtime 配置或 migration 路径：`<是/否 + 具体路径>`
   - 回滚方案：`<revert 本 PR + 补充>`
   - 兼容验证证据：`<最小复现命令 or 可复现命令输出>`
