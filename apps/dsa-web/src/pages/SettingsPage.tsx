@@ -1428,7 +1428,7 @@ const SettingsPage: React.FC = () => {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <h1 className="text-xl font-semibold tracking-tight text-foreground">{t('settings.pageTitle')}</h1>
-            <p className="max-w-3xl text-sm leading-6 text-muted-text">
+            <p className="max-w-3xl text-xs leading-5 text-muted-text sm:text-sm sm:leading-6">
               {t('settings.pageDescription')}
             </p>
           </div>
@@ -1437,6 +1437,8 @@ const SettingsPage: React.FC = () => {
             <Button
               type="button"
               variant="settings-secondary"
+              size="sm"
+              className="px-2.5"
               onClick={resetDraft}
               disabled={isLoading || isSaving}
             >
@@ -1446,6 +1448,8 @@ const SettingsPage: React.FC = () => {
             <Button
               type="button"
               variant="settings-primary"
+              size="sm"
+              className="px-2.5"
               onClick={() => void handleSaveConfig()}
               disabled={!effectiveHasDirty || isSaving || isLoading}
               isLoading={isSaving}
@@ -1483,7 +1487,7 @@ const SettingsPage: React.FC = () => {
       {isLoading ? (
         <SettingsLoading />
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[248px_minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_minmax(0,1fr)]">
           <aside className="lg:sticky lg:top-4 lg:self-start">
             <SettingsCategoryNav
               categories={categories}
