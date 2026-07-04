@@ -158,6 +158,48 @@ def test_market_structure_service_infers_concept_board_from_missing_type_name() 
     assert position["related_boards"][0]["source"] == "concept"
 
 
+def test_market_structure_service_resolves_missing_type_board_from_concept_rankings() -> None:
+    service = MarketStructureService(
+        fetcher_manager=_FakeFetcherManager(),
+        hotspot_service=_EmptyHotspotService(),
+    )
+    fundamental_context = {
+        "market": "cn",
+        "belong_boards": [{"name": "新能源"}],
+        "concept_boards": {
+            "status": "ok",
+            "data": {
+                "top": [{"name": "新能源", "rank": 1, "change_pct": 5.6}],
+                "bottom": [],
+            },
+        },
+        "boards": {
+            "status": "ok",
+            "data": {
+                "top": [{"name": "通用设备", "rank": 2, "change_pct": 2.1}],
+                "bottom": [],
+            },
+        },
+    }
+
+    context = service.build_context(
+        code="300024",
+        stock_name="机器人",
+        market="cn",
+        fundamental_context=fundamental_context,
+        trade_date="2026-07-04",
+    )
+
+    position = context["stock_market_position"]
+    assert position["status"] == "ok"
+    assert position["primary_theme"]["source"] == "concept"
+    assert position["primary_theme"]["change_pct"] == 5.6
+    assert position["theme_phase"] == "accelerating"
+    assert "theme_ranking_match" not in position["missing_fields"]
+    assert position["related_boards"][0]["source"] == "concept"
+    assert position["related_boards"][0]["change_pct"] == 5.6
+
+
 def test_market_structure_service_keeps_stock_layer_partial_without_ranking_evidence() -> None:
     service = MarketStructureService(fetcher_manager=_FakeFetcherManager())
     fundamental_context = {

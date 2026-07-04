@@ -197,12 +197,12 @@ class MarketStructureService:
             if not name:
                 continue
             board_type = self._optional_text(board.get("type"))
-            is_concept = self._is_concept_type(board_type) or (
-                board_type is None and self._is_concept_type(name)
+            source, ranking_item = self._resolve_board_rank_source(
+                name,
+                board_type=board_type,
+                sector_rankings=sector_rankings,
+                concept_rankings=concept_rankings,
             )
-            source: ThemeRankSource = "concept" if is_concept else "industry"
-            ranking_payload = concept_rankings if source == "concept" else sector_rankings
-            ranking_item = self._find_ranking_item(name, ranking_payload)
             related.append(
                 StockBoardPosition(
                     name=name,
@@ -214,6 +214,31 @@ class MarketStructureService:
                 )
             )
         return related
+
+    def _resolve_board_rank_source(
+        self,
+        name: str,
+        *,
+        board_type: Optional[str],
+        sector_rankings: Dict[str, Any],
+        concept_rankings: Dict[str, Any],
+    ) -> tuple[ThemeRankSource, Optional[Dict[str, Any]]]:
+        if board_type is not None:
+            source: ThemeRankSource = "concept" if self._is_concept_type(board_type) else "industry"
+            ranking_payload = concept_rankings if source == "concept" else sector_rankings
+            return source, self._find_ranking_item(name, ranking_payload)
+
+        concept_item = self._find_ranking_item(name, concept_rankings)
+        if concept_item is not None:
+            return "concept", concept_item
+
+        sector_item = self._find_ranking_item(name, sector_rankings)
+        if sector_item is not None:
+            return "industry", sector_item
+
+        if self._is_concept_type(name):
+            return "concept", None
+        return "industry", None
 
     def _infer_primary_theme(
         self,
