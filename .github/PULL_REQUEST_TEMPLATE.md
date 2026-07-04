@@ -49,6 +49,11 @@ git diff --name-only "$BASE_REF"..HEAD
 - 必须同时给出 `Head`/`Base` 的原始值：
   - Head：`git rev-parse --short HEAD`
   - Base：`git merge-base HEAD origin/main`
+- 补充要求（流程/可追溯性）：
+  - 变更清单需逐条覆盖：后端、API、schema、service、web、tests、治理文档（`docs/**`）、`src/services/decision_signal_service.py`（如有命中）、`docs/architecture/api_spec.json`（如有命中）等；若遗漏任一类文件，请补齐。
+  - 额外要求在 Scope 一栏补一条：
+    - `结构化扫描核验文件：` 并粘贴 `rg -n "external model|runtime migration|provider|model|base URL|LITELLM" api src docs tests .github`
+  - 对 `.github/PULL_REQUEST_TEMPLATE.md`、`.github/copilot-instructions.md`、`AGENTS.md`、`.github/instructions/*`、`.claude/skills/**` 等治理文件，Scope 下必须加一行：`协作治理变更影响面=是`，并在 Compatibility/rollback 继续展开。
 - 受影响面（按实际变更逐项列出）：
   - 建议逐项标注 backend / schema / service / API / web / tests / docs / governance / config 等类别
   - backend / agent / schema / service / API
@@ -131,6 +136,20 @@ python -m pytest -m "not network"
 
 请说明兼容性影响、潜在风险（如无请写 `None`）。  
 *(EN) Describe compatibility impact and potential risks (write `None` if not applicable).*
+
+- 结构化扫描（external model/API / runtime config migration）命中闭环（此段为必填）：
+  - 命中来源/规则ID：`<tool|rule-id>`
+  - 命中路径：`<文件路径1> -> <调用链>`
+  - 命中证据：`<文件路径/日志/命令>`
+  - 官方来源或公告（若涉及协议/边界变更）：`<URL>`
+  - 判定结论：`false-positive` / `true-impact`
+  - 受影响 runtime 配置或 migration 路径：`<是/否 + 具体路径>`
+  - 回滚方案：`<revert 本 PR + 补充>`
+  - 兼容验证证据：`<最小复现命令 or 可复现命令输出>`
+  - 若判定 `false-positive`，请给出：
+    - `未改 config registry / 未改 migration 脚本 / 未改运行时配置持久化清理`（逐条落地）
+    - `provider/model/base_url`（如有命中）仅作历史快照或展示字段，不参与运行时路由的证明路径（例如 `rg -n "provider|model_used|base_url|config registry|persist" api/src`）
+    - 回退方式（默认 `revert this PR`）
 
 - 若本 PR 修改第三方模型 / API 的兼容语义、请求参数、路由前缀或 provider fallback，请提供**官方来源链接或公告**，并说明这是长期约束、当前运行时约束还是临时兼容处理。  
   请在下方补充所影响外部 API/服务、回归范围与回退方式。  
