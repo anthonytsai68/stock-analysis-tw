@@ -39,7 +39,12 @@ git diff --name-only "$BASE_REF"..HEAD
 ```
 
 - 文件总数 / 变更行数（建议粘贴 `git diff --stat "$BASE_REF"..HEAD`）：
-- 文件清单（按实际 diff 全量，逐项列出）：
+- 文件清单（按 `git diff --name-only "$BASE_REF"..HEAD` 全量逐项列出）：
+- 受影响面（按实际变更逐项列出）：
+  - backend / agent / schema / service / API
+  - web / desktop（若有）
+  - docs
+  - tests
 - 文档更新文件（`docs/*`）：
 
 ## Issue Link
