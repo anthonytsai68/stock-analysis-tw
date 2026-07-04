@@ -40,6 +40,7 @@ git diff --name-only "$BASE_REF"..HEAD
 
 - 文件总数 / 变更行数（建议粘贴 `git diff --stat "$BASE_REF"..HEAD`）：
 - 文件清单（按 `git diff --name-only "$BASE_REF"..HEAD` 全量逐项列出）：
+  - 请直接粘贴命令原始输出，不得删减空行。若发现遗漏，请同步补齐后再提交。
 - 受影响面（按实际变更逐项列出）：
   - 建议逐项标注 backend / schema / service / API / web / tests / docs / governance / config 等类别
   - backend / agent / schema / service / API
@@ -126,6 +127,13 @@ python -m pytest -m "not network"
 - 若本 PR 修改第三方模型 / API 的兼容语义、请求参数、路由前缀或 provider fallback，请提供**官方来源链接或公告**，并说明这是长期约束、当前运行时约束还是临时兼容处理。  
   请在下方补充所影响外部 API/服务、回归范围与回退方式。  
   *(EN) If this PR changes third-party model/API compatibility, request parameters, routing prefixes, or provider fallback behavior, include an **official source link or announcement** and clarify whether the rule is permanent, runtime-specific, or a temporary compatibility workaround.)*
+- 若结构化检查/扫描报告出现 `external model/API` 或 `runtime config migration` 风险提示，请补充：
+  - 风险来源与命中标识（工具/规则 ID）
+  - 受影响文件与调用路径
+  - 复现与回归验证（最少 1 条可复现命令或日志）
+  - 判定结果：`true-impact` 或 `false-positive`
+  - 对应回滚方案（误报可写“无 runtime 变更，revert 本 PR 即可”）
+  - 若为误报，请给出无配置迁移/无路由变更的可核验依据（如未修改 config registry、路由入口、迁移脚本等）。
 - 若本 PR 未触及第三方模型/API、provider/model/base URL 或运行时配置保存/清理/迁移逻辑，请在此段直接按以下文案确认（无须再次展开）：  
   `本 PR 未变更 provider/model/base URL、运行时配置清理迁移语义；历史配置保持不变；回滚方式为 revert 本提交。`
 - 若本 PR 修改 `.github/PULL_REQUEST_TEMPLATE.md` / PR 流程模板类文件，请在此明确：仅影响协作流程与模板维护，不改 runtime 行为；回退方式为 revert；并补充是否影响自动化提交流程。  
