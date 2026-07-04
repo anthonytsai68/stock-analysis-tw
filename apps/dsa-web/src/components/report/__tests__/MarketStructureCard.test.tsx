@@ -86,6 +86,16 @@ describe('MarketStructureCard', () => {
     expect(screen.getByText('Missing Evidence')).toBeVisible();
   });
 
+  it('renders Korean labels', () => {
+    render(<MarketStructureCard context={context} language="ko" />);
+
+    expect(screen.getByRole('region', { name: '테마 라인 및 종목 포지션' })).toBeInTheDocument();
+    expect(screen.getByText('시장 테마 레이어')).toBeVisible();
+    expect(screen.getByText('종목 포지션 레이어')).toBeVisible();
+    expect(screen.getByText('가속')).toBeVisible();
+    expect(screen.getByText('추종')).toBeVisible();
+  });
+
   it('does not render unsupported or invalid context', () => {
     const unsupported = {
       ...context,

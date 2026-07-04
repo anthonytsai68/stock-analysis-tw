@@ -49,27 +49,58 @@ def format_market_structure_prompt_section(
     missing_fields = list(dict.fromkeys(missing_fields))
 
     if language == "en":
-        lines = [
-            "\n## Market Structure Context",
-            f"- Status: {context.get('status', 'unknown')}",
-        ]
-        if active_themes:
-            lines.append(f"- Active themes: {', '.join(active_themes)}")
-        if leading_concepts:
-            lines.append(f"- Leading concepts: {', '.join(leading_concepts)}")
-        if leading_industries:
-            lines.append(f"- Leading industries: {', '.join(leading_industries)}")
-        if primary_name:
-            lines.append(f"- Stock primary theme: {primary_name}")
-        lines.append(f"- Theme phase: {stock_position.get('theme_phase', 'unknown')}")
-        lines.append(f"- Stock role: {stock_position.get('stock_role', 'unknown')}")
-        if risk_tags:
-            lines.append(f"- Risk tags: {', '.join(risk_tags)}")
-        if missing_fields:
-            lines.append(f"- Missing evidence: {', '.join(missing_fields)}")
-        lines.append("- Guardrail: do not claim leader-stock status without constituent or leader evidence.")
+        lines = _format_en(context, stock_position, active_themes, leading_concepts, leading_industries, primary_name, risk_tags, missing_fields)
+        return "\n".join(lines) + "\n"
+    if language == "ko":
+        lines = _format_ko(context, stock_position, active_themes, leading_concepts, leading_industries, primary_name, risk_tags, missing_fields)
         return "\n".join(lines) + "\n"
 
+    lines = _format_zh(context, stock_position, active_themes, leading_concepts, leading_industries, primary_name, risk_tags, missing_fields)
+    return "\n".join(lines) + "\n"
+
+
+def _format_en(
+    context: Any,
+    stock_position: dict[str, Any],
+    active_themes: List[str],
+    leading_concepts: List[str],
+    leading_industries: List[str],
+    primary_name: str,
+    risk_tags: List[str],
+    missing_fields: List[str],
+) -> List[str]:
+    lines = [
+        "\n## Market Structure Context",
+        f"- Status: {context.get('status', 'unknown')}",
+    ]
+    if active_themes:
+        lines.append(f"- Active themes: {', '.join(active_themes)}")
+    if leading_concepts:
+        lines.append(f"- Leading concepts: {', '.join(leading_concepts)}")
+    if leading_industries:
+        lines.append(f"- Leading industries: {', '.join(leading_industries)}")
+    if primary_name:
+        lines.append(f"- Stock primary theme: {primary_name}")
+    lines.append(f"- Theme phase: {stock_position.get('theme_phase', 'unknown')}")
+    lines.append(f"- Stock role: {stock_position.get('stock_role', 'unknown')}")
+    if risk_tags:
+        lines.append(f"- Risk tags: {', '.join(risk_tags)}")
+    if missing_fields:
+        lines.append(f"- Missing evidence: {', '.join(missing_fields)}")
+    lines.append("- Guardrail: do not claim leader-stock status without constituent or leader evidence.")
+    return lines
+
+
+def _format_zh(
+    context: Any,
+    stock_position: dict[str, Any],
+    active_themes: List[str],
+    leading_concepts: List[str],
+    leading_industries: List[str],
+    primary_name: str,
+    risk_tags: List[str],
+    missing_fields: List[str],
+) -> List[str]:
     lines = [
         "\n## 市场结构上下文",
         f"- 状态：{context.get('status', 'unknown')}",
@@ -89,7 +120,39 @@ def format_market_structure_prompt_section(
     if missing_fields:
         lines.append(f"- 缺失证据：{'，'.join(missing_fields)}")
     lines.append("- 约束：没有成分股或 leader_stocks 证据时，不要断言个股是题材龙头。")
-    return "\n".join(lines) + "\n"
+    return lines
+
+
+def _format_ko(
+    context: Any,
+    stock_position: dict[str, Any],
+    active_themes: List[str],
+    leading_concepts: List[str],
+    leading_industries: List[str],
+    primary_name: str,
+    risk_tags: List[str],
+    missing_fields: List[str],
+) -> List[str]:
+    lines = [
+        "\n## 시장 구조 컨텍스트",
+        f"- 상태: {context.get('status', '알 수 없음')}",
+    ]
+    if active_themes:
+        lines.append(f"- 활성 테마: {', '.join(active_themes)}")
+    if leading_concepts:
+        lines.append(f"- 선도 테마: {', '.join(leading_concepts)}")
+    if leading_industries:
+        lines.append(f"- 선도 산업: {', '.join(leading_industries)}")
+    if primary_name:
+        lines.append(f"- 개별 종목 주력 테마: {primary_name}")
+    lines.append(f"- 테마 단계: {stock_position.get('theme_phase', '알 수 없음')}")
+    lines.append(f"- 종목 위치: {stock_position.get('stock_role', '알 수 없음')}")
+    if risk_tags:
+        lines.append(f"- 리스크 태그: {', '.join(risk_tags)}")
+    if missing_fields:
+        lines.append(f"- 부족한 근거: {', '.join(missing_fields)}")
+    lines.append("- 제약 규칙: 구성종목이나 leader_stocks 근거가 없다면 종목을 테마 선도주로 단정하지 마십시오.")
+    return lines
 
 
 def _item_names(value: Any, *, limit: int) -> List[str]:

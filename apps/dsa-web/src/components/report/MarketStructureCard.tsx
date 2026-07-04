@@ -95,6 +95,40 @@ const TEXT = {
       unknown: 'Unknown',
     },
   },
+  ko: {
+    eyebrow: '시장 포지션',
+    title: '테마 라인 및 종목 포지션',
+    marketLayer: '시장 테마 레이어',
+    stockLayer: '종목 포지션 레이어',
+    activeThemes: '활성 테마',
+    leadingConcepts: '선도 테마',
+    leadingIndustries: '선도 산업',
+    primaryTheme: '주요 관련 테마',
+    themePhase: '테마 단계',
+    stockRole: '종목 역할',
+    riskTags: '리스크 태그',
+    dataQuality: '데이터 품질',
+    missingFields: '부족한 근거',
+    empty: '없음',
+    status: {
+      ok: '사용 가능',
+      partial: '일부 사용',
+      unknown: '알 수 없음',
+      not_supported: '미지원',
+    },
+    phase: {
+      warming: '온도 상승',
+      accelerating: '가속',
+      cooling: '쿨다운',
+      unknown: '알 수 없음',
+    },
+    role: {
+      leader: '리더',
+      follower: '추종',
+      edge: '엣지',
+      unknown: '알 수 없음',
+    },
+  },
 } as const;
 
 const formatItem = (item: RankedThemeItem): string => {
@@ -124,7 +158,11 @@ export const MarketStructureCard: React.FC<MarketStructureCardProps> = ({ contex
   }
 
   const reportLanguage = normalizeReportLanguage(language);
-  const text = TEXT[reportLanguage === 'en' ? 'en' : 'zh'];
+  const text = reportLanguage === 'en'
+    ? TEXT.en
+    : reportLanguage === 'ko'
+      ? TEXT.ko
+      : TEXT.zh;
   const marketTheme = context.marketThemeContext;
   const stockPosition = context.stockMarketPosition;
   if (!marketTheme || !stockPosition) {
