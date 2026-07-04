@@ -63,38 +63,23 @@ class MarketStructureService:
         stock_code = str(code or "").strip()
 
         if normalized_market != "cn":
-            theme_context = MarketThemeContext(
-                status="not_supported",
+            return self._build_not_supported_context(
                 market=normalized_market,
                 trade_date=trade_date_text,
-                data_quality=MarketStructureDataQuality(
-                    status="not_supported",
-                    missing_fields=["a_share_theme_context"],
-                    sources=[
-                        MarketStructureSource(
-                            provider="dsa",
-                            dataset="market_structure",
-                            status="not_supported",
-                            message="stock market structure is only supported for A-share first version",
-                        )
-                    ],
-                ),
-            )
-            stock_position = StockMarketPosition(
-                status="not_supported",
                 stock_code=stock_code,
                 stock_name=stock_name,
-                market=normalized_market,
                 missing_fields=["a_share_theme_context"],
+                message="stock market structure is only supported for A-share first version",
             )
-            return dump_market_structure_model(
-                MarketStructureContext(
-                    status="not_supported",
-                    market=normalized_market,
-                    trade_date=trade_date_text,
-                    market_theme_context=theme_context,
-                    stock_market_position=stock_position,
-                )
+
+        if self._is_unsupported_fundamental_context(fundamental_context):
+            return self._build_not_supported_context(
+                market=normalized_market,
+                trade_date=trade_date_text,
+                stock_code=stock_code,
+                stock_name=stock_name,
+                missing_fields=["fundamental_boards"],
+                message="fundamental board context is not supported for this stock",
             )
 
         board_details = extract_board_detail_fields(
@@ -195,6 +180,73 @@ class MarketStructureService:
             stock_market_position=stock_position,
         )
         return dump_market_structure_model(context)
+
+    @staticmethod
+    def _is_unsupported_fundamental_context(
+        fundamental_context: Optional[Dict[str, Any]],
+    ) -> bool:
+        if not isinstance(fundamental_context, dict):
+            return False
+
+        if MarketStructureService._is_not_supported_status(fundamental_context.get("status")):
+            return True
+
+        boards_block = fundamental_context.get("boards")
+        boards_status = boards_block.get("status") if isinstance(boards_block, dict) else None
+        if MarketStructureService._is_not_supported_status(boards_status):
+            return True
+
+        coverage = fundamental_context.get("coverage")
+        boards_coverage = coverage.get("boards") if isinstance(coverage, dict) else None
+        return MarketStructureService._is_not_supported_status(boards_coverage)
+
+    @staticmethod
+    def _is_not_supported_status(value: Any) -> bool:
+        return str(value or "").strip().lower() == "not_supported"
+
+    @staticmethod
+    def _build_not_supported_context(
+        *,
+        market: str,
+        trade_date: Optional[str],
+        stock_code: str,
+        stock_name: Optional[str],
+        missing_fields: List[str],
+        message: str,
+    ) -> Dict[str, Any]:
+        theme_context = MarketThemeContext(
+            status="not_supported",
+            market=market,
+            trade_date=trade_date,
+            data_quality=MarketStructureDataQuality(
+                status="not_supported",
+                missing_fields=missing_fields,
+                sources=[
+                    MarketStructureSource(
+                        provider="dsa",
+                        dataset="market_structure",
+                        status="not_supported",
+                        message=message,
+                    )
+                ],
+            ),
+        )
+        stock_position = StockMarketPosition(
+            status="not_supported",
+            stock_code=stock_code,
+            stock_name=stock_name,
+            market=market,
+            missing_fields=missing_fields,
+        )
+        return dump_market_structure_model(
+            MarketStructureContext(
+                status="not_supported",
+                market=market,
+                trade_date=trade_date,
+                market_theme_context=theme_context,
+                stock_market_position=stock_position,
+            )
+        )
 
     def _build_related_boards(
         self,

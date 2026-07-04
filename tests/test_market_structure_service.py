@@ -274,6 +274,43 @@ def test_market_structure_service_reuses_fundamental_rankings_for_theme_layer() 
     assert context["market_theme_context"]["leading_concepts"][0]["rank"] == 1
 
 
+def test_market_structure_service_skips_hotspots_for_unsupported_board_context() -> None:
+    unsupported_payloads = [
+        {
+            "market": "cn",
+            "status": "not_supported",
+            "coverage": {"boards": "not_supported"},
+            "boards": {"status": "not_supported", "data": {}},
+            "errors": ["fundamental pipeline disabled"],
+        },
+        {
+            "market": "cn",
+            "status": "partial",
+            "coverage": {"boards": "not_supported"},
+            "boards": {"status": "not_supported", "data": {}},
+            "errors": ["etf not fully supported"],
+        },
+    ]
+
+    for fundamental_context in unsupported_payloads:
+        fetcher = _FakeFetcherManager()
+        service = MarketStructureService(fetcher_manager=fetcher)
+
+        context = service.build_context(
+            code="159915",
+            stock_name="创业板ETF",
+            market="cn",
+            fundamental_context=fundamental_context,
+            trade_date="2026-07-04",
+        )
+
+        assert context["status"] == "not_supported"
+        assert context["market_theme_context"]["status"] == "not_supported"
+        assert context["stock_market_position"]["status"] == "not_supported"
+        assert fetcher.sector_calls == 0
+        assert fetcher.concept_calls == 0
+
+
 def test_market_structure_service_combines_market_and_stock_layers() -> None:
     service = MarketStructureService(fetcher_manager=_FakeFetcherManager())
     fundamental_context = {
