@@ -46,6 +46,9 @@ git diff --name-only "$BASE_REF"..HEAD
 - 文件总数 / 变更行数（建议粘贴 `git diff --stat "$BASE_REF"..HEAD`）：
 - 文件清单（按 `git diff --name-only "$BASE_REF"..HEAD` 全量逐项列出）：
   - 请直接粘贴命令原始输出，不得删减空行。若发现遗漏，请同步补齐后再提交。
+  - 对以下高风险文件类别需逐项强制逐条列出且逐项覆盖后再提交（无则请写 `未命中`）：
+    - `api/v1/**`、`src/services/decision_signal_service.py`、`docs/architecture/api_spec.json`
+    - `tests/**`、`docs/**`、治理/流程类文件（`.github/**`、`AGENTS.md`、`CLAUDE.md`、`.github/instructions/**`）
 - 必须同时给出 `Head`/`Base` 的原始值：
   - Head：`git rev-parse --short HEAD`
   - Base：`git merge-base HEAD origin/main`
@@ -141,6 +144,7 @@ python -m pytest -m "not network"
   - 命中来源/规则ID：`<tool|rule-id>`
   - 命中路径：`<文件路径1> -> <调用链>`
   - 命中证据：`<文件路径/日志/命令>`
+  - 旧配置/迁移可证伪点：`<示例：未改 config registry / 未改 migration 脚本 / 未改 OpenAI-compatible 路由>`
   - 官方来源或公告（若涉及协议/边界变更）：`<URL>`
   - 判定结论：`false-positive` / `true-impact`
   - 受影响 runtime 配置或 migration 路径：`<是/否 + 具体路径>`
