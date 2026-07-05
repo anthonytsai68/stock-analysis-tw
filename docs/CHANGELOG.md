@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > For user-friendly release highlights, see the [GitHub Releases](https://github.com/ZhuLinsen/daily_stock_analysis/releases) page.
 
 ## [Unreleased]
+- [改进] Web 报告页输入数据块在数据缺失、抓取失败或新闻上下文未进入 LLM 输入时显示可操作处理建议，并区分报告页补充资讯与本次分析输入。
 - [修复] WebUI 启动时显式 `--host` / `--port` 不再被 `.env` 中的 `WEBUI_HOST` / `WEBUI_PORT` 覆盖，未传 CLI 参数时统一使用解析后的运行时配置。
 - [改进] GitHub Actions: 每日分析工作流（`00-daily-analysis.yml`）新增钉钉通知环境变量映射，支持在云端定时任务中直接使用钉钉机器人。
 - [修复] Web 持仓页首屏快照改用 `include_realtime=false` 快速估值，跳过逐票实时行情预取后先展示持仓列表，避免外部实时行情源变慢时长时间空白等待。

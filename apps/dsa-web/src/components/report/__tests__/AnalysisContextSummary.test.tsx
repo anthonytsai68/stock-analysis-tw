@@ -104,8 +104,12 @@ describe('AnalysisContextSummary', () => {
     expect(screen.getByText('数据限制:')).toBeInTheDocument();
     expect(screen.getByText(/基本面：抓取失败/)).toBeInTheDocument();
     expect(screen.getByText(/news_provider_timeout/)).toBeInTheDocument();
-    expect(screen.getByText(/未进入分析输入 \(news_context_missing\)/)).toBeInTheDocument();
-    expect(screen.getByText(/fundamental_pipeline_failed/)).toBeInTheDocument();
+    expect(screen.getByText(/缺失原因: 未进入分析输入/)).toBeInTheDocument();
+    expect(screen.getByText(/诊断码: news_context_missing/)).toBeInTheDocument();
+    expect(screen.getByText('来源: 未记录输入来源')).toBeInTheDocument();
+    expect(screen.getByText(/上方相关资讯可能来自报告页补充检索或历史持久化/)).toBeInTheDocument();
+    expect(screen.getByText(/若需要新闻参与分析，请检查搜索服务配置、网络或接口限流后重新分析/)).toBeInTheDocument();
+    expect(screen.getAllByText(/fundamental_pipeline_failed/).length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('新闻结果数: 3').some((item) => item.textContent === '新闻结果数: 3')).toBe(true);
     expect(screen.getAllByText('本次分析输入')[0]).toBeVisible();
   });
@@ -127,6 +131,7 @@ describe('AnalysisContextSummary', () => {
 
     expect(screen.getByText('Data Limitations:')).toBeInTheDocument();
     expect(screen.getByText(/fundamentals: Fetch failed/)).toBeInTheDocument();
+    expect(screen.getByText(/Related news above may come from supplemental report-page retrieval/)).toBeInTheDocument();
   });
 
   it('surfaces degraded non-zero states in the collapsed summary', () => {

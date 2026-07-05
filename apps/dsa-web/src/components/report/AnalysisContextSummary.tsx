@@ -68,8 +68,11 @@ const TEXT = {
     title: '输入数据块',
     counts: '状态计数',
     source: '来源',
+    sourceUnavailable: '未记录输入来源',
     warnings: '告警',
     missingReasons: '缺失原因',
+    diagnosticCodes: '诊断码',
+    actionHint: '处理建议',
     inputScope: '本次分析输入',
     evidenceScope: '仅代表进入本次 LLM 的输入，不等同于数据源运行成功',
     qualityScore: '质量分',
@@ -92,14 +95,28 @@ const TEXT = {
       partial: '部分可用',
       fetch_failed: '抓取失败',
     },
+    guidance: {
+      newsMissingWithResults: '上方相关资讯可能来自报告页补充检索或历史持久化；本次 LLM 输入没有使用新闻上下文。若需要新闻参与分析，请检查搜索服务配置、网络或接口限流后重新分析。',
+      newsMissing: '本次没有可用新闻上下文进入 LLM。请检查搜索服务配置、网络或接口限流，也可以稍后重新分析。',
+      missing: '该数据块没有进入本次 LLM 输入。请检查对应数据源配置、网络或接口限流后重新分析。',
+      fetch_failed: '数据源抓取失败。请检查对应 provider 配置、网络和接口限流后重新分析。',
+      partial: '只有部分字段进入本次 LLM 输入，结论需要结合其他数据块复核。',
+      fallback: '本次使用降级数据源，结论可靠性可能低于主数据源。',
+      stale: '本次使用过期数据，建议等数据源更新后重新分析。',
+      estimated: '本次包含估算字段，盘中结论建议结合实时行情复核。',
+      not_supported: '当前市场或标的不支持该数据块，通常无需处理。',
+    },
   },
   en: {
     eyebrow: 'DATA CONTEXT',
     title: 'Input Blocks',
     counts: 'Status Counts',
     source: 'Source',
+    sourceUnavailable: 'Input source not recorded',
     warnings: 'Warnings',
     missingReasons: 'Missing Reasons',
+    diagnosticCodes: 'Diagnostic Codes',
+    actionHint: 'Suggested Action',
     inputScope: 'Analysis Input',
     evidenceScope: 'Shows inputs included in this LLM run, not provider run success',
     qualityScore: 'Quality',
@@ -122,14 +139,28 @@ const TEXT = {
       partial: 'Partial',
       fetch_failed: 'Fetch failed',
     },
+    guidance: {
+      newsMissingWithResults: 'Related news above may come from supplemental report-page retrieval or persisted history; this LLM run did not use news context. To include news in analysis, check search configuration, network, or rate limits and reanalyze.',
+      newsMissing: 'No usable news context entered this LLM run. Check search configuration, network, or rate limits, or reanalyze later.',
+      missing: 'This block was not included in this LLM run. Check the matching data source configuration, network, or rate limits and reanalyze.',
+      fetch_failed: 'The data source fetch failed. Check provider configuration, network, and rate limits before reanalyzing.',
+      partial: 'Only part of this block entered the LLM input. Cross-check the conclusion with other data blocks.',
+      fallback: 'A fallback data source was used, so confidence may be lower than with the primary source.',
+      stale: 'Stale data was used. Reanalyze after the data source updates.',
+      estimated: 'Estimated fields were included. Cross-check intraday conclusions against real-time quotes.',
+      not_supported: 'This market or symbol does not support this block; usually no action is required.',
+    },
   },
   ko: {
     eyebrow: '데이터 컨텍스트',
     title: '입력 데이터 블록',
     counts: '상태 카운트',
     source: '출처',
+    sourceUnavailable: '입력 출처 기록 없음',
     warnings: '경고',
     missingReasons: '누락 사유',
+    diagnosticCodes: '진단 코드',
+    actionHint: '권장 조치',
     inputScope: '이번 분석 입력',
     evidenceScope: '이번 LLM 입력에 포함된 항목만 표시하며, 데이터 소스 실행 성공과는 다릅니다',
     qualityScore: '품질 점수',
@@ -151,6 +182,17 @@ const TEXT = {
       estimated: '추정',
       partial: '부분 사용',
       fetch_failed: '수집 실패',
+    },
+    guidance: {
+      newsMissingWithResults: '위 관련 뉴스는 리포트 페이지 보충 검색 또는 저장된 이력에서 온 것일 수 있으며, 이번 LLM 입력에는 뉴스 컨텍스트가 포함되지 않았습니다. 뉴스까지 분석에 반영하려면 검색 설정, 네트워크, 제한 상태를 확인한 뒤 다시 분석하세요.',
+      newsMissing: '이번 LLM 입력에 사용할 뉴스 컨텍스트가 없습니다. 검색 설정, 네트워크, 제한 상태를 확인하거나 잠시 후 다시 분석하세요.',
+      missing: '이 데이터 블록은 이번 LLM 입력에 포함되지 않았습니다. 해당 데이터 소스 설정, 네트워크, 제한 상태를 확인한 뒤 다시 분석하세요.',
+      fetch_failed: '데이터 소스 수집에 실패했습니다. provider 설정, 네트워크, 제한 상태를 확인한 뒤 다시 분석하세요.',
+      partial: '일부 필드만 이번 LLM 입력에 포함되었습니다. 다른 데이터 블록과 함께 결론을 확인하세요.',
+      fallback: '대체 데이터 소스를 사용했습니다. 기본 데이터 소스보다 신뢰도가 낮을 수 있습니다.',
+      stale: '만료된 데이터를 사용했습니다. 데이터 소스가 갱신된 뒤 다시 분석하는 것을 권장합니다.',
+      estimated: '추정 필드가 포함되었습니다. 장중 결론은 실시간 시세와 함께 확인하세요.',
+      not_supported: '현재 시장 또는 종목은 이 데이터 블록을 지원하지 않으며, 보통 별도 조치가 필요하지 않습니다.',
     },
   },
 } as const;
@@ -235,7 +277,33 @@ const formatLimitation = (
 
 const formatMissingReason = (reason: string, language: ReportLanguage): string => {
   const label = MISSING_REASON_LABELS[language][reason];
-  return label ? `${label} (${reason})` : reason;
+  return label || reason;
+};
+
+const guidanceClassName = (status: AnalysisContextPackBlockStatus): string => {
+  if (status === 'missing' || status === 'fetch_failed') {
+    return 'border-danger/25 bg-danger/10 text-danger';
+  }
+  if (status === 'not_supported') {
+    return 'border-border/60 bg-muted/20 text-muted-text';
+  }
+  return 'border-warning/25 bg-warning/10 text-warning';
+};
+
+const getBlockGuidance = (
+  block: AnalysisContextPackOverview['blocks'][number],
+  overview: AnalysisContextPackOverview,
+  text: (typeof TEXT)[ReportLanguage],
+): string | null => {
+  if (block.status === 'available') {
+    return null;
+  }
+  if (block.key === 'news' && block.status === 'missing') {
+    return (overview.metadata?.newsResultCount || 0) > 0
+      ? text.guidance.newsMissingWithResults
+      : text.guidance.newsMissing;
+  }
+  return text.guidance[block.status] || null;
 };
 
 export const AnalysisContextSummary: React.FC<AnalysisContextSummaryProps> = ({
@@ -373,6 +441,7 @@ export const AnalysisContextSummary: React.FC<AnalysisContextSummaryProps> = ({
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {overview.blocks.map((block) => {
               const style = STATUS_STYLE[block.status] || STATUS_STYLE.missing;
+              const guidance = getBlockGuidance(block, overview, text);
               return (
                 <div key={block.key} className="home-subpanel p-3">
                   <div className="flex items-start justify-between gap-3">
@@ -381,6 +450,10 @@ export const AnalysisContextSummary: React.FC<AnalysisContextSummaryProps> = ({
                       {block.source ? (
                         <p className="mt-1 truncate text-xs text-secondary-text">
                           {text.source}: {block.source}
+                        </p>
+                      ) : block.status !== 'available' ? (
+                        <p className="mt-1 truncate text-xs text-secondary-text">
+                          {text.source}: {text.sourceUnavailable}
                         </p>
                       ) : null}
                     </div>
@@ -400,6 +473,17 @@ export const AnalysisContextSummary: React.FC<AnalysisContextSummaryProps> = ({
                       {text.missingReasons}: {block.missingReasons
                         .map((reason) => formatMissingReason(reason, reportLanguage))
                         .join(', ')}
+                    </p>
+                  ) : null}
+                  {block.missingReasons?.length ? (
+                    <p className="mt-1 text-[11px] leading-5 text-muted-text">
+                      {text.diagnosticCodes}: {block.missingReasons.join(', ')}
+                    </p>
+                  ) : null}
+                  {guidance ? (
+                    <p className={`mt-2 rounded-lg border px-3 py-2 text-xs leading-5 ${guidanceClassName(block.status)}`}>
+                      <span className="font-medium">{text.actionHint}: </span>
+                      {guidance}
                     </p>
                   ) : null}
                 </div>
