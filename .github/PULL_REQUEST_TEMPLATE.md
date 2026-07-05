@@ -22,11 +22,19 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 请按实际 `git diff` 全量列出本次变更的模块与文件范围（不得遗漏文件名，建议以 `git diff --name-only` 输出为准）。
 
 - 文件总数（必填）：
-- 文件清单（必填，建议按 `git diff --name-only HEAD~1...HEAD` 输出逐条粘贴）：
+- 文件清单（必填，建议按 PR base 与 Head 的差异输出）：
+  - `git diff --name-only <pr-base-commit> HEAD`（如 base 为 `main`：`git diff --name-only $(git merge-base origin/main HEAD) HEAD`）
   - 
 
 若本 PR 包含 `.github/**`、`AGENTS.md`、`CLAUDE.md`、`.github/instructions/**`、`.claude/skills/**` 等协作与治理文件，请补充“变更原因 + 影响面 + 回滚方式（默认 revert）”。
 并补充该类文件的治理资产验证命令与结果（至少包含 `python scripts/check_ai_assets.py` 的结果）。
+
+## EXTRACT_PROMPT Change
+
+若本 PR 修改了 `src/services/image_stock_extractor.py` 的 `EXTRACT_PROMPT`，请在下方贴出本次 PR 最新完整 prompt。
+
+- 变更前：
+- 变更后：
 
 ## Issue Link
 
