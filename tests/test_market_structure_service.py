@@ -202,6 +202,21 @@ class _UnexpectedRankingFetcherManager:
         raise AssertionError("concept rankings should be reused from fundamental_context")
 
 
+def _wait_for_market_hotspot_workers_to_drain(timeout: float = 0.5) -> bool:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        with MarketHotspotService._ranking_fetch_futures_lock:
+            pending = [
+                future
+                for future in MarketHotspotService._ranking_fetch_futures.values()
+                if not future.done()
+            ]
+        if not pending:
+            return True
+        time.sleep(0.01)
+    return False
+
+
 def test_market_hotspot_service_builds_theme_context_from_dsa_rankings() -> None:
     service = MarketHotspotService(fetcher_manager=_FakeFetcherManager())
 
@@ -264,6 +279,7 @@ def test_market_hotspot_service_bounds_ranking_fetches() -> None:
         context = service.get_hotspots(market="cn", trade_date="2026-07-04")
     finally:
         fetcher.release.set()
+        _wait_for_market_hotspot_workers_to_drain()
 
     assert time.monotonic() - started_at < 0.2
     assert context["status"] == "unknown"
@@ -285,6 +301,7 @@ def test_market_hotspot_service_does_not_stack_workers_after_timeout() -> None:
         second = service.get_hotspots(market="cn", trade_date="2026-07-04")
     finally:
         fetcher.release.set()
+        _wait_for_market_hotspot_workers_to_drain()
 
     assert first["status"] == "unknown"
     assert second["status"] == "unknown"
@@ -294,34 +311,36 @@ def test_market_hotspot_service_does_not_stack_workers_after_timeout() -> None:
     assert any("timeout" in error for error in second["data_quality"]["errors"])
 
 
-def test_market_hotspot_service_recovers_after_permanent_ranking_timeout() -> None:
-    stuck_fetcher = _PermanentlyBlockingRankingFetcherManager(block=True)
-    stuck_service = MarketHotspotService(
-        fetcher_manager=stuck_fetcher,
+def test_market_hotspot_service_keeps_permanent_timeouts_under_worker_cap() -> None:
+    fetcher = _PermanentlyBlockingRankingFetcherManager(block=True)
+    service = MarketHotspotService(
+        fetcher_manager=fetcher,
         ranking_fetch_timeout_seconds=0.05,
         failure_cache_ttl_seconds=0.0,
     )
+    drained = False
 
-    first = stuck_service.get_hotspots(market="cn", trade_date="2026-07-04")
+    try:
+        first = service.get_hotspots(market="cn", trade_date="2026-07-04")
 
-    assert first["status"] == "unknown"
-    assert stuck_fetcher.sector_started.wait(timeout=0.2)
-    assert stuck_fetcher.concept_started.wait(timeout=0.2)
+        assert first["status"] == "unknown"
+        assert fetcher.sector_started.wait(timeout=0.2)
+        assert fetcher.concept_started.wait(timeout=0.2)
 
-    time.sleep(RANKING_FETCH_TIMEOUT_RETRY_DELAY_SECONDS + 0.05)
+        time.sleep(RANKING_FETCH_TIMEOUT_RETRY_DELAY_SECONDS + 0.05)
+        second = service.get_hotspots(market="cn", trade_date="2026-07-04")
 
-    recovered_fetcher = _PermanentlyBlockingRankingFetcherManager(block=False)
-    recovered_service = MarketHotspotService(
-        fetcher_manager=recovered_fetcher,
-        ranking_fetch_timeout_seconds=0.2,
-        failure_cache_ttl_seconds=0.0,
-    )
+        time.sleep(RANKING_FETCH_TIMEOUT_RETRY_DELAY_SECONDS + 0.05)
+        third = service.get_hotspots(market="cn", trade_date="2026-07-04")
+    finally:
+        fetcher.release.set()
+        drained = _wait_for_market_hotspot_workers_to_drain()
 
-    recovered = recovered_service.get_hotspots(market="cn", trade_date="2026-07-04")
-
-    assert recovered["status"] == "ok"
-    assert recovered_fetcher.sector_calls == 1
-    assert recovered_fetcher.concept_calls == 1
+    assert drained
+    assert second["status"] == "unknown"
+    assert third["status"] == "unknown"
+    assert fetcher.sector_calls == 1
+    assert fetcher.concept_calls == 1
 
 
 def test_market_hotspot_service_marks_flat_down_rankings_as_ok_without_active_themes() -> None:

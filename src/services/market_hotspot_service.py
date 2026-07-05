@@ -403,8 +403,7 @@ class MarketHotspotService:
         except FutureTimeoutError as exc:
             if future.done() and future.exception(timeout=0) is exc:
                 raise
-            future.cancel()
-            cls._abandon_ranking_fetch(
+            cls._mark_ranking_fetch_timeout(
                 effective_inflight_key,
                 future,
                 retry_after=time.monotonic()
@@ -479,7 +478,7 @@ class MarketHotspotService:
                     cls._ranking_fetch_retry_after.pop(inflight_key, None)
 
     @classmethod
-    def _abandon_ranking_fetch(
+    def _mark_ranking_fetch_timeout(
         cls,
         inflight_key: Hashable,
         future: Future,
@@ -488,9 +487,7 @@ class MarketHotspotService:
     ) -> None:
         with cls._ranking_fetch_futures_lock:
             if cls._ranking_fetch_futures.get(inflight_key) is future:
-                cls._ranking_fetch_futures.pop(inflight_key, None)
                 cls._ranking_fetch_retry_after[inflight_key] = (future, retry_after)
-                cls._ranking_fetch_slots.release()
 
     @classmethod
     def _drop_unstarted_ranking_fetch(
