@@ -36,6 +36,7 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 请按受影响改动面说明本次影响范围（如 backend/web/api/docs/治理资产等），包含 governance 文件时请同步解释变更动机与影响面。
 
 请在正文中同步写出本 PR 的当前 Head（如 `Current HEAD: <hash>`）。
+若本 PR 有新 commit，请确认正文中仅保留该 commit 对应的 Head 并标注：`本段已重算（本次提交）。`
 
 若本 PR 包含 `.github/**`、`AGENTS.md`、`CLAUDE.md`、`.github/instructions/**`、`.claude/skills/**` 等协作与治理文件，请补充“变更原因 + 影响面 + 回滚方式（默认 revert）”。
 并补充该类文件的治理资产验证命令与结果（至少包含 `python scripts/check_ai_assets.py` 的结果）。
@@ -72,6 +73,7 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 - 无法截图时需写明原因与可复现替代证据。
   - 若涉及受影响页面，请覆盖对应报告页/列表页/设置页关键状态视图（按实际触达面选择）；
   - 不可用真实历史报告时，请补充可复用的 mock 页（含 mock 数据）或 Actions artifact 链接，并在 PR 评论中给出复现步骤与截图入口。
+  - 若采用 mock 页面，需说明复现起始环境（命令 + 产物路径）并确认至少可复现出 1 张桌面端截图。
 
 ## Verification Commands And Results
 
@@ -90,12 +92,19 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 请说明兼容性影响、潜在风险（如无请写 `None`）。
 
 - 是否触及运行时配置、路由或迁移语义：是 / 否
-- 是否触及 provider/model/base URL 相关语义：是 / 否
+  - 是否触及 provider/model/base URL 相关语义：是 / 否
   - 若是，必须逐条说明（建议按“文件 | 命中文本 | false-positive 依据 | 运行时影响 | 回滚与验证”逐条提交）：
     - 命中来源（文件与关键词/扫描项）
     - 是否为 false positive（是 / 否）
     - 旧行为是否有静默清理或迁移语义影响（有 / 无）
     - 回滚方案与验证依据
+    - 建议按以下格式逐项填写并完整列出 1 行/文件：
+      - ```
+        | 文件 | 命中文本 | false-positive 依据 | 运行时影响 | 回滚与验证 |
+        | --- | --- | --- | --- | --- |
+        | api/v1/endpoints/analysis.py | provider/model/base_url | False-positive（文档说明） | 无 | 回归原有配置链路 |
+        | docs/... | model_used | False-positive（展示字段） | 无 | revert 即可恢复 |
+        ```
   - 请确认命中源是否属于以下非运行时改动：仅模板文本、注释、测试、文档、单测 mock；若是 false positive 请在下方逐条列明“文件-命中文本-判定依据”。
     - 常见非运行时命中示例：`api_spec.json` 中服务器 URL 示例、文档中的配置说明、PR/治理模板描述、测试 mock/fixture、报告展示字段说明。
   - 若存在运行时影响或兼容风险，请同步列出“旧配置迁移路径（含回退步骤）”与验证依据（例如回归测试、CI 结果或本地复现命令）。
