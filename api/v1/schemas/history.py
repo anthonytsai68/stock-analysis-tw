@@ -138,7 +138,7 @@ class ReportMeta(BaseModel):
     change_pct: Optional[float] = Field(None, description="分析时涨跌幅(%)")
     model_used: Optional[str] = Field(
         None,
-        description="历史报告元数据中的模型快照，仅用于展示，不影响 Provider/Model/Base URL 运行时路由",
+        description="历史报告元数据中的模型快照，仅用于展示；不参与运行时模型调用路径或配置路由",
     )
     market_phase_summary: Optional[MarketPhaseSummary] = Field(
         None,
@@ -352,7 +352,7 @@ class StockBarItem(BaseModel):
     last_analysis_time: Optional[str] = Field(None, description="最近一次分析时间")
     model_used: Optional[str] = Field(
         None,
-        description="最新分析使用的模型快照",
+        description="最新分析使用的模型快照，仅用于列表展示；不改动运行时调用与配置路径",
     )
     market_phase_summary: Optional[MarketPhaseSummary] = Field(
         None,
