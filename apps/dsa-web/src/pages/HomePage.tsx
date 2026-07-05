@@ -461,6 +461,20 @@ const HomePage: React.FC = () => {
     return Array.from(codesByNormalized.entries());
   }, [watchlistState.watchlistCodes]);
 
+  const stockBarItemByCode = useMemo(() => {
+    const itemsByCode = new Map<string, StockBarItem>();
+    for (const item of stockBarItems) {
+      if (item.stockCode === 'MARKET') {
+        continue;
+      }
+      const key = getStockCodeKey(item.stockCode);
+      if (key) {
+        itemsByCode.set(key, item);
+      }
+    }
+    return itemsByCode;
+  }, [stockBarItems]);
+
   useEffect(() => {
     const missingCodes = watchlistCodesByNormalized
       .filter(([key]) => !stockBarItemByCode.has(key))
@@ -772,20 +786,6 @@ const HomePage: React.FC = () => {
   }, [notify, pollMarketReviewStatus, scrollMarketReviewFeedbackIntoView, t]);
 
   const todayDateKey = getTodayInShanghai();
-  const stockBarItemByCode = useMemo(() => {
-    const itemsByCode = new Map<string, StockBarItem>();
-    for (const item of stockBarItems) {
-      if (item.stockCode === 'MARKET') {
-        continue;
-      }
-      const key = getStockCodeKey(item.stockCode);
-      if (key) {
-        itemsByCode.set(key, item);
-      }
-    }
-    return itemsByCode;
-  }, [stockBarItems]);
-
   const activeTaskByCode = useMemo(() => {
     const tasksByCode = new Map<string, TaskInfo>();
     for (const task of activeTasks) {

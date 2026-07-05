@@ -510,12 +510,13 @@ describe('HomePage', () => {
     fireEvent.click(await screen.findByRole('button', { name: '自选' }));
 
     expect(await screen.findByLabelText('今日已分析')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '仅未分析' })).toBeDisabled();
+    const analyzePendingButton = screen.getByRole('button', { name: '仅未分析' });
+    expect(analyzePendingButton).toBeDisabled();
+    fireEvent.click(analyzePendingButton);
+    expect(analysisApi.analyzeAsync).not.toHaveBeenCalled();
     expect(screen.queryByText('今天还没有分析结果')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '今日' }));
     expect(await screen.findByRole('button', { name: /Apple/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '仅未分析' }));
-    expect(analysisApi.analyzeAsync).not.toHaveBeenCalled();
   });
 
   it('removes the MARKET stock bar item after deleting market review history', async () => {
