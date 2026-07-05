@@ -27,7 +27,13 @@ import { useWatchlist } from '../hooks/useWatchlist';
 import { useUiLanguage } from '../contexts/UiLanguageContext';
 import type { SetupStatusResponse } from '../types/systemConfig';
 import { normalizeReportLanguage } from '../utils/reportLanguage';
-import type { AnalyzeAsyncResponse, MarketReviewPayload, StockBarItem, TaskInfo } from '../types/analysis';
+import type {
+  AnalyzeAsyncResponse,
+  HistoryItem,
+  MarketReviewPayload,
+  StockBarItem,
+  TaskInfo,
+} from '../types/analysis';
 import type { RunFlowSnapshotSource } from '../types/runFlow';
 import { getTodayInShanghai } from '../utils/format';
 import { normalizeStockCode } from '../utils/stockCode';
@@ -92,6 +98,23 @@ function countBatchAccepted(result: AnalyzeAsyncResponse): { accepted: number; d
   return { accepted: 1, duplicates: 0 };
 }
 
+function toStockBarItemFromHistoryItem(item: HistoryItem): StockBarItem {
+  return {
+    id: item.id,
+    stockCode: item.stockCode,
+    stockName: item.stockName,
+    reportType: item.reportType,
+    sentimentScore: item.sentimentScore,
+    operationAdvice: item.operationAdvice,
+    action: item.action ?? null,
+    actionLabel: item.actionLabel ?? null,
+    analysisCount: 0,
+    lastAnalysisTime: item.createdAt,
+    modelUsed: item.modelUsed,
+    marketPhaseSummary: item.marketPhaseSummary ?? null,
+  };
+}
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -110,6 +133,7 @@ const HomePage: React.FC = () => {
   const [sidebarWorkspaceTab, setSidebarWorkspaceTab] = useState<HomeWorkspaceTab>('history');
   const [isBatchAnalyzingWatchlist, setIsBatchAnalyzingWatchlist] = useState(false);
   const [batchAnalyzeStatus, setBatchAnalyzeStatus] = useState<BatchAnalyzeStatus>(null);
+  const [watchlistHistoryItemsByCode, setWatchlistHistoryItemsByCode] = useState<Map<string, StockBarItem>>(new Map());
   const duplicateBannerTimer = useRef<number | null>(null);
   const marketReviewPollTimer = useRef<number | null>(null);
   const dashboardScrollRef = useRef<HTMLElement | null>(null);
@@ -425,6 +449,69 @@ const HomePage: React.FC = () => {
   });
 
   const watchlistState = useWatchlist();
+  const watchlistCodesByNormalized = useMemo(() => {
+    const codesByNormalized = new Map<string, string>();
+    for (const code of watchlistState.watchlistCodes) {
+      const key = getStockCodeKey(code);
+      if (!key || key === 'MARKET' || codesByNormalized.has(key)) {
+        continue;
+      }
+      codesByNormalized.set(key, code);
+    }
+    return Array.from(codesByNormalized.entries());
+  }, [watchlistState.watchlistCodes]);
+
+  useEffect(() => {
+    const missingCodes = watchlistCodesByNormalized
+      .filter(([key]) => !stockBarItemByCode.has(key))
+      .map(([, code]) => code);
+
+    if (missingCodes.length === 0) {
+      setWatchlistHistoryItemsByCode(new Map());
+      return;
+    }
+
+    let isCanceled = false;
+    void (async () => {
+      try {
+        const results = await Promise.all(
+          missingCodes.map(async (code) => {
+            try {
+              const response = await historyApi.getList({ stockCode: code, limit: 1 });
+              return response.items[0] ? [code, response.items[0]] as const : null;
+            } catch {
+              return null;
+            }
+          }),
+        );
+
+        if (isCanceled) {
+          return;
+        }
+
+        const next = new Map<string, StockBarItem>();
+        for (const entry of results) {
+          if (!entry) {
+            continue;
+          }
+          const [code, item] = entry;
+          const key = getStockCodeKey(code);
+          if (key) {
+            next.set(key, toStockBarItemFromHistoryItem(item));
+          }
+        }
+        setWatchlistHistoryItemsByCode(next);
+      } catch {
+        if (!isCanceled) {
+          setWatchlistHistoryItemsByCode(new Map());
+        }
+      }
+    })();
+
+    return () => {
+      isCanceled = true;
+    };
+  }, [stockBarItemByCode, watchlistCodesByNormalized]);
 
   const clearMarketReviewState = useCallback(() => {
     stopMarketReviewPolling();
@@ -719,7 +806,9 @@ const HomePage: React.FC = () => {
   const watchlistRows = useMemo<HomeWatchlistRow[]>(() => (
     watchlistState.watchlistCodes.map((code) => {
       const key = getStockCodeKey(code);
-      const latestItem = key ? stockBarItemByCode.get(key) : undefined;
+      const latestItem = key
+        ? stockBarItemByCode.get(key) ?? watchlistHistoryItemsByCode.get(key)
+        : undefined;
       return {
         code,
         latestItem,
@@ -727,7 +816,13 @@ const HomePage: React.FC = () => {
         activeTask: key ? activeTaskByCode.get(key) : undefined,
       };
     })
-  ), [activeTaskByCode, stockBarItemByCode, todayDateKey, watchlistState.watchlistCodes]);
+  ), [
+    activeTaskByCode,
+    stockBarItemByCode,
+    todayDateKey,
+    watchlistHistoryItemsByCode,
+    watchlistState.watchlistCodes,
+  ]);
 
   const watchlistAnalyzedTodayCount = useMemo(
     () => watchlistRows.filter((row) => row.analyzedToday).length,
@@ -739,9 +834,29 @@ const HomePage: React.FC = () => {
     [watchlistRows],
   );
 
-  const todayAnalysisItems = useMemo(() => (
-    stockBarItems
-      .filter((item) => item.stockCode !== 'MARKET')
+  const watchlistHistoryItems = useMemo(
+    () => Array.from(watchlistHistoryItemsByCode.values()),
+    [watchlistHistoryItemsByCode],
+  );
+  const todayAnalysisItems = useMemo(() => {
+    const itemsByCode = new Map<string, StockBarItem>();
+    for (const item of stockBarItems) {
+      if (item.stockCode === 'MARKET') {
+        continue;
+      }
+      const key = getStockCodeKey(item.stockCode);
+      if (key) {
+        itemsByCode.set(key, item);
+      }
+    }
+    for (const item of watchlistHistoryItems) {
+      const key = getStockCodeKey(item.stockCode);
+      if (key) {
+        itemsByCode.set(key, item);
+      }
+    }
+
+    return Array.from(itemsByCode.values())
       .filter((item) => getShanghaiDateKey(item.lastAnalysisTime) === todayDateKey)
       .sort((left, right) => {
         const leftScore = typeof left.sentimentScore === 'number' ? left.sentimentScore : -1;
@@ -752,8 +867,8 @@ const HomePage: React.FC = () => {
         const leftTime = left.lastAnalysisTime ? Date.parse(left.lastAnalysisTime) : 0;
         const rightTime = right.lastAnalysisTime ? Date.parse(right.lastAnalysisTime) : 0;
         return rightTime - leftTime;
-      })
-  ), [stockBarItems, todayDateKey]);
+      });
+  }, [stockBarItems, todayDateKey, watchlistHistoryItems]);
 
   const handleAnalyzeWatchlist = useCallback(async (mode: WatchlistAnalyzeMode) => {
     const sourceCodes = mode === 'pending' ? pendingWatchlistCodes : watchlistState.watchlistCodes;

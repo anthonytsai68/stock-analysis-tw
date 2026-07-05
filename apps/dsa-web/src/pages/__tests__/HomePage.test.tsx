@@ -450,6 +450,74 @@ describe('HomePage', () => {
     expect(analysisApi.analyzeAsync).not.toHaveBeenCalled();
   });
 
+  it('falls back to watchlist history lookup when watchlist code is outside stock-bar window', async () => {
+    const todayInShanghai = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai' }).format(new Date());
+    vi.mocked(systemConfigApi.getWatchlist).mockResolvedValue(['AAPL']);
+    vi.mocked(historyApi.getStockBarList).mockResolvedValue({
+      total: 1,
+      items: [{
+        id: 11,
+        stockCode: '600519',
+        stockName: '贵州茅台',
+        reportType: 'detailed',
+        sentimentScore: 72,
+        operationAdvice: '观察',
+        analysisCount: 2,
+        lastAnalysisTime: `${todayInShanghai}T22:00:00`,
+      }],
+    });
+    vi.mocked(historyApi.getList).mockImplementation((params: { stockCode?: string } = {}) => {
+      if (params.stockCode === 'AAPL') {
+        return Promise.resolve({
+          total: 1,
+          page: 1,
+          limit: 1,
+          items: [{
+            id: 12,
+            queryId: 'q-aapl',
+            stockCode: 'AAPL',
+            stockName: 'Apple',
+            reportType: 'detailed' as const,
+            sentimentScore: 68,
+            operationAdvice: '中性',
+            createdAt: `${todayInShanghai}T09:20:00`,
+          }],
+        });
+      }
+      if (params.stockCode) {
+        return Promise.resolve({
+          total: 0,
+          page: 1,
+          limit: 1,
+          items: [],
+        });
+      }
+
+      return Promise.resolve({
+        total: 0,
+        page: 1,
+        limit: 20,
+        items: [],
+      });
+    });
+
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: '自选' }));
+
+    expect(await screen.findByLabelText('今日已分析')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '仅未分析' })).toBeDisabled();
+    expect(screen.queryByText('今天还没有分析结果')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '今日' }));
+    expect(await screen.findByRole('button', { name: /Apple/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '仅未分析' }));
+    expect(analysisApi.analyzeAsync).not.toHaveBeenCalled();
+  });
+
   it('removes the MARKET stock bar item after deleting market review history', async () => {
     let isMarketReviewDeleted = false;
     vi.mocked(historyApi.getStockBarList).mockResolvedValue({
