@@ -2,6 +2,9 @@
 .venv/
 logs/
 data/cache/
+data/stock_analysis.db
+data/stock_analysis.db-shm
+data/stock_analysis.db-wal
 __pycache__/
 *.pyc
 .DS_Store
