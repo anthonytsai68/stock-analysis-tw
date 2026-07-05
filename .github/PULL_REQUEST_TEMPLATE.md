@@ -43,6 +43,8 @@ git diff --name-only "$BASE_REF"..HEAD
 > - Base：`git merge-base HEAD origin/main`
 > - 文件总数 / 增删行（原始输出）：
 >   `git diff --stat "$BASE_REF"..HEAD`
+> - 文件清单（原始输出）：
+>   `git diff --name-only "$BASE_REF"..HEAD`
 - 文件总数 / 变更行数（建议粘贴 `git diff --stat "$BASE_REF"..HEAD`）：
 - 文件清单（按 `git diff --name-only "$BASE_REF"..HEAD` 全量逐项列出）：
   - 请直接粘贴命令原始输出，不得删减空行。若发现遗漏，请同步补齐后再提交。
@@ -182,6 +184,7 @@ python -m pytest -m "not network"
     - 受影响 runtime config/migration 路径：`未改`
     - 已审核文件：`config registry / 路由入口 / migration 脚本`（可写“未改及未命中”）
     - `provider` / `model_used`、`base URL`、路由快照字段仅为历史展示语义时，请明确写明“仅展示、不影响运行时路由；未改 model/provider/base URL/OPENAI_* 相关配置持久化逻辑（附证据）”。
+    - 证据命名建议：给出以上三类文件的 `rg` 或 `git diff --name-only "$BASE_REF"..HEAD` 证明（可写示例文件：`src/analyzer.py`、`src/services/system_config_service.py`、`src/storage/migrations/**`）。
   - 建议按如下模板直接复用（便于审查回溯）：
     - 风险来源：`<tools/rule-id>`
     - 命中路径：`<文件路径1> -> <调用路径>`
