@@ -21,18 +21,17 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 
 请按当前 PR 的真实受影响改动面，完整列出变更范围（不得遗漏文件名）：
 
-- 当前 Head（必填）：
-  - `git rev-parse HEAD`
-- 当前 Base（建议）：
-  - `git merge-base origin/main HEAD`
-- 文件总数（必填）：
-  - `git diff --name-only --diff-filter=ACMRDTUXB $(git merge-base origin/main HEAD) HEAD | wc -l`
-- 行变更（增/删，必填）：
-  - `git diff --stat --numstat $(git merge-base origin/main HEAD) HEAD`
-- 文件清单（必填）：
-  - `git diff --name-only --diff-filter=ACMRDTUXB $(git merge-base origin/main HEAD) HEAD`
+- 请先执行以下脚本（可复制）并在正文贴出完整输出（禁止只贴命令）：
+```bash
+BASE=$(git merge-base origin/main HEAD)
+echo "CURRENT_HEAD=$(git rev-parse HEAD)"
+echo "CURRENT_BASE=$BASE"
+echo "FILES_CHANGED=$(git diff --name-only --diff-filter=ACMRDTUXB \"$BASE\" HEAD | wc -l)"
+git diff --stat --numstat "$BASE" HEAD
+git diff --name-only --diff-filter=ACMRDTUXB "$BASE" HEAD
+```
 
-请在正文按上述命令顺序原样贴出三段结果，提交前必须确保与当前 PR 正文头尾一致且不复用旧值；若有追加 commit，需重复重算并覆盖旧数据。
+请在正文按输出结果顺序原样贴出，不得截断、不得复用旧值；若有追加 commit，需重复重算并覆盖旧数据。
 
 请直接粘贴上述命令输出，不得截断。若 PR 在提交周期内有新增 commit，提交说明前必须重算并覆盖旧值（禁止沿用历史头信息）。
 请按受影响改动面说明本次影响范围（如 backend/web/api/docs/治理资产等），包含 governance 文件时请同步解释变更动机与影响面。
@@ -64,6 +63,13 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 - 受影响页面需与 PR 内容一致（按改动面选择，不限定特定页面）：
   - 仅 backend-only 或 docs-only PR 可不附 UI 截图，并在此处注明原因。
   - 修改了报告/页面展示时，至少附 1 张桌面端截图，移动端截图按实际可复现情况补充。
+
+截图提交要求（必填）：
+
+- 截图来源（请选择其一并补齐链接）：
+  - Playwright 脚本产物（`apps/dsa-web/test-results/**/*.png`）
+  - CI Artifact 链接（含截图路径与重放/查看说明）
+  - 本地可复现命令（含截图输出路径）
 - 复现截图命令（至少给出一种）：
   - `cd apps/dsa-web && npx playwright test ...`（按实际可复现实验脚本填写）
   - 或在有后端/登录凭证情况下运行 `npm run test:smoke` 并说明截图来源。
@@ -76,6 +82,7 @@ For English contributors: please fill in English. All fields marked (EN) accept 
   - 若涉及受影响页面，请覆盖对应报告页/列表页/设置页关键状态视图（按实际触达面选择）；
   - 不可用真实历史报告时，请补充可复用的 mock 页（含 mock 数据）或 Actions artifact 链接，并在 PR 评论中给出复现步骤与截图入口。
   - 若采用 mock 页面，需说明复现起始环境（命令 + 产物路径）并确认至少可复现出 1 张桌面端截图。
+  - 修改了报告页/AI 建议页/市场结构展示时，至少附 1 张包含新增卡片（如 `MarketStructureCard`）可见区域的桌面截图；如使用 mock 页面，请说明 mock 的触发条件与参数。
 
 ## Verification Commands And Results
 
@@ -93,20 +100,25 @@ For English contributors: please fill in English. All fields marked (EN) accept 
 
 请说明兼容性影响、潜在风险（如无请写 `None`）。
 
-- 是否触及运行时配置、路由或迁移语义：是 / 否
+  - 是否触及运行时配置、路由或迁移语义：是 / 否
   - 是否触及 provider/model/base URL 相关语义：是 / 否
   - 若是，必须逐条说明（建议按“文件 | 命中文本 | false-positive 依据 | 运行时影响 | 回滚与验证”逐条提交）：
     - 命中来源（文件与关键词/扫描项）
     - 是否为 false positive（是 / 否）
     - 旧行为是否有静默清理或迁移语义影响（有 / 无）
     - 回滚方案与验证依据
-    - 建议按以下格式逐项填写并完整列出 1 行/文件：
+    - 建议按以下格式逐项填写并完整列出 1 行/文件（不满足请直接写 `N/A`）：
       - ```
         | 文件 | 命中文本 | false-positive 依据 | 运行时影响 | 回滚与验证 |
         | --- | --- | --- | --- | --- |
         | api/v1/endpoints/analysis.py | provider/model/base_url | False-positive（文档说明） | 无 | 回归原有配置链路 |
         | docs/... | model_used | False-positive（展示字段） | 无 | revert 即可恢复 |
         ```
+    - 常见 false-positive 命中样例（仅作参考，可直接替换）：
+      - `.github/PULL_REQUEST_TEMPLATE.md`（PR 模板或说明文案）
+      - `docs/architecture/api_spec.json`（文档级 API 示例地址）
+      - `docs/full-guide*.md`（配置说明与展示文档）
+      - `api_spec`、测试 mock、历史展示字段的快照/元数据定义
     - 若同一语句出现在模板、文档、测试、mock 或展示字段中，请在表中明确写明 `false-positive`，并说明为何不触发运行时迁移或 provider/model/base URL 加载链路。
   - 请确认命中源是否属于以下非运行时改动：仅模板文本、注释、测试、文档、单测 mock；若是 false positive 请在下方逐条列明“文件-命中文本-判定依据”。
     - 常见非运行时命中示例：`api_spec.json` 中服务器 URL 示例、文档中的配置说明、PR/治理模板描述、测试 mock/fixture、报告展示字段说明。
