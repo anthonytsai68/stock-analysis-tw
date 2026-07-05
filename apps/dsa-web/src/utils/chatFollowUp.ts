@@ -1,7 +1,6 @@
 import type { AnalysisReport } from '../types/analysis';
 import { historyApi } from '../api/history';
 import { validateStockCode } from './validation';
-import type { AnalysisReport } from '../types/analysis';
 
 export interface ChatFollowUpContext {
   stock_code: string;
