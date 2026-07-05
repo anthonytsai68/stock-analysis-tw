@@ -17,8 +17,8 @@ from src.storage import AnalysisHistory, DatabaseManager
 
 logger = logging.getLogger(__name__)
 
-MARKET_LIGHT_REGIONS = frozenset({"cn", "hk", "us", "jp", "kr"})
-MARKET_LIGHT_ALERT_REGIONS = frozenset({"cn", "hk", "us"})
+MARKET_LIGHT_REGIONS = frozenset({"cn", "hk", "us", "jp", "kr", "tw"})
+MARKET_LIGHT_ALERT_REGIONS = frozenset({"cn", "hk", "us", "tw"})
 MARKET_LIGHT_HISTORY_BATCH_SIZE = 100
 
 
