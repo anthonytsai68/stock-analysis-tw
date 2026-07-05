@@ -259,6 +259,11 @@ STOCK_NAME_MAP = {
     "8440.TWO": "綠電",
     "8442.TWO": "威宏-KY",
     "8443.TWO": "阿瘦",
+    # === Crypto ===
+    "BTC-USD": "比特幣",
+    "ETH-USD": "以太幣",
+    "SOL-USD": "Solana",
+    # === US stocks ===
     "AAPL": "苹果",
     "TSLA": "特斯拉",
     "MSFT": "微软",
