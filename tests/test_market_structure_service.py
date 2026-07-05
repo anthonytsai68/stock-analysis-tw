@@ -245,6 +245,28 @@ def test_market_hotspot_service_bounds_ranking_fetches() -> None:
     assert any("timeout" in error for error in context["data_quality"]["errors"])
 
 
+def test_market_hotspot_service_does_not_stack_workers_after_timeout() -> None:
+    fetcher = _BlockingRankingFetcherManager()
+    service = MarketHotspotService(
+        fetcher_manager=fetcher,
+        ranking_fetch_timeout_seconds=0.01,
+        failure_cache_ttl_seconds=0.0,
+    )
+
+    try:
+        first = service.get_hotspots(market="cn", trade_date="2026-07-04")
+        second = service.get_hotspots(market="cn", trade_date="2026-07-04")
+    finally:
+        fetcher.release.set()
+
+    assert first["status"] == "unknown"
+    assert second["status"] == "unknown"
+    assert fetcher.sector_calls == 1
+    assert fetcher.concept_calls == 1
+    assert any("timeout" in error for error in first["data_quality"]["errors"])
+    assert any("timeout" in error for error in second["data_quality"]["errors"])
+
+
 def test_market_hotspot_service_marks_flat_down_rankings_as_ok_without_active_themes() -> None:
     service = MarketHotspotService(fetcher_manager=_DownTrendFetcherManager())
 

@@ -11,9 +11,10 @@ from __future__ import annotations
 import logging
 import copy
 import threading
+from concurrent.futures import Future, TimeoutError as FutureTimeoutError
 from datetime import date
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, Hashable, List, Optional, Tuple
 
 from data_provider import DataFetcherManager
 
@@ -34,10 +35,15 @@ logger = logging.getLogger(__name__)
 DEFAULT_RANKING_FETCH_TIMEOUT_SECONDS = 3.0
 DEFAULT_RANKING_CACHE_FAILURE_TTL_SECONDS = 30.0
 DEFAULT_RANKING_CACHE_SUCCESS_TTL_SECONDS = 60.0
+RANKING_FETCH_MAX_WORKERS = 2
 
 
 class MarketHotspotService:
     """Build low-sensitive A-share market/theme context from DSA rankings."""
+
+    _ranking_fetch_slots = threading.BoundedSemaphore(RANKING_FETCH_MAX_WORKERS)
+    _ranking_fetch_futures: Dict[Hashable, Future] = {}
+    _ranking_fetch_futures_lock = threading.Lock()
 
     def __init__(
         self,
@@ -318,6 +324,7 @@ class MarketHotspotService:
                 lambda: fetch_rankings(limit),
                 timeout_seconds=self._resolve_ranking_fetch_timeout_seconds(),
                 task_name=dataset,
+                inflight_key=(type(self.fetcher_manager), fetch_name, limit),
             )
             if isinstance(rankings, tuple) and len(rankings) == 2:
                 top, bottom = rankings
@@ -370,40 +377,102 @@ class MarketHotspotService:
         except Exception:
             return DEFAULT_RANKING_FETCH_TIMEOUT_SECONDS
 
-    @staticmethod
+    @classmethod
     def _call_with_timeout(
+        cls,
         task: Callable[[], Any],
         *,
         timeout_seconds: float,
         task_name: str,
+        inflight_key: Optional[Hashable] = None,
     ) -> Any:
         timeout_value = max(0.0, float(timeout_seconds))
         if timeout_value <= 0:
             raise TimeoutError(f"{task_name} ranking fetch timeout")
 
-        result_holder: Dict[str, Any] = {}
-        error_holder: Dict[str, BaseException] = {}
-
-        def runner() -> None:
-            try:
-                result_holder["value"] = task()
-            except BaseException as exc:
-                error_holder["value"] = exc
-
-        worker = threading.Thread(
-            target=runner,
-            daemon=True,
-            name=f"market-hotspot-{task_name}",
+        future = cls._get_or_submit_ranking_fetch(
+            task,
+            inflight_key=inflight_key or task_name,
+            task_name=task_name,
         )
-        worker.start()
-        worker.join(timeout=timeout_value)
-        if worker.is_alive():
+        try:
+            return future.result(timeout=timeout_value)
+        except FutureTimeoutError as exc:
+            if future.done() and future.exception(timeout=0) is exc:
+                raise
             raise TimeoutError(
                 f"{task_name} ranking fetch timeout after {timeout_value:g}s"
+            ) from exc
+
+    @classmethod
+    def _get_or_submit_ranking_fetch(
+        cls,
+        task: Callable[[], Any],
+        *,
+        inflight_key: Hashable,
+        task_name: str,
+    ) -> Future:
+        submitted: Future
+        worker: threading.Thread
+        with cls._ranking_fetch_futures_lock:
+            current = cls._ranking_fetch_futures.get(inflight_key)
+            if current is not None:
+                if not current.done():
+                    return current
+                cls._ranking_fetch_futures.pop(inflight_key, None)
+                cls._ranking_fetch_slots.release()
+
+            if not cls._ranking_fetch_slots.acquire(blocking=False):
+                raise TimeoutError(f"{task_name} ranking fetch in-flight limit reached")
+
+            future: Future = Future()
+            cls._ranking_fetch_futures[inflight_key] = future
+            future.add_done_callback(
+                lambda done_future: cls._forget_ranking_fetch(inflight_key, done_future)
             )
-        if "value" in error_holder:
-            raise error_holder["value"]
-        return result_holder.get("value")
+            worker = threading.Thread(
+                target=cls._run_ranking_fetch,
+                args=(future, task),
+                daemon=True,
+                name=f"market-hotspot-{task_name}",
+            )
+            submitted = future
+        try:
+            worker.start()
+        except BaseException as exc:
+            cls._drop_unstarted_ranking_fetch(inflight_key, submitted)
+            submitted.set_exception(exc)
+            raise
+        return submitted
+
+    @classmethod
+    def _forget_ranking_fetch(cls, inflight_key: Hashable, future: Future) -> None:
+        with cls._ranking_fetch_futures_lock:
+            if cls._ranking_fetch_futures.get(inflight_key) is future:
+                cls._ranking_fetch_futures.pop(inflight_key, None)
+                cls._ranking_fetch_slots.release()
+
+    @classmethod
+    def _drop_unstarted_ranking_fetch(
+        cls,
+        inflight_key: Hashable,
+        future: Future,
+    ) -> None:
+        with cls._ranking_fetch_futures_lock:
+            if cls._ranking_fetch_futures.get(inflight_key) is future:
+                cls._ranking_fetch_futures.pop(inflight_key, None)
+                cls._ranking_fetch_slots.release()
+
+    @staticmethod
+    def _run_ranking_fetch(future: Future, task: Callable[[], Any]) -> None:
+        if not future.set_running_or_notify_cancel():
+            return
+        try:
+            result = task()
+        except BaseException as exc:
+            future.set_exception(exc)
+        else:
+            future.set_result(result)
 
     def _normalize_ranked_items(
         self,
