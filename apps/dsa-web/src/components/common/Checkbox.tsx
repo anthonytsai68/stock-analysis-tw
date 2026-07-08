@@ -8,7 +8,7 @@ interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>
 }
 
 /**
- * 定制化的大尺寸勾选框组件
+ * 定製化的大尺寸勾選框組件
  */
 export const Checkbox: React.FC<CheckboxProps> = ({
   label,

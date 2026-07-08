@@ -32,40 +32,40 @@ import { validateStockCode } from '../../utils/validation';
 import { Button, Card, Checkbox, Input, Select } from '../common';
 
 const SYMBOL_ALERT_TYPE_OPTIONS = [
-  { value: 'price_cross', label: '价格突破' },
-  { value: 'price_change_percent', label: '涨跌幅' },
+  { value: 'price_cross', label: '價格突破' },
+  { value: 'price_change_percent', label: '漲跌幅' },
   { value: 'volume_spike', label: '成交量放大' },
-  { value: 'ma_price_cross', label: '价格均线穿越' },
-  { value: 'rsi_threshold', label: 'RSI 阈值' },
+  { value: 'ma_price_cross', label: '價格均線穿越' },
+  { value: 'rsi_threshold', label: 'RSI 閾值' },
   { value: 'macd_cross', label: 'MACD 金叉/死叉' },
   { value: 'kdj_cross', label: 'KDJ 金叉/死叉' },
-  { value: 'cci_threshold', label: 'CCI 阈值' },
+  { value: 'cci_threshold', label: 'CCI 閾值' },
 ];
 
 const PORTFOLIO_ALERT_TYPE_OPTIONS = [
-  { value: 'portfolio_stop_loss', label: '组合止损' },
-  { value: 'portfolio_concentration', label: '组合集中度' },
-  { value: 'portfolio_drawdown', label: '组合回撤' },
-  { value: 'portfolio_price_stale', label: '组合价格状态' },
+  { value: 'portfolio_stop_loss', label: '組合止損' },
+  { value: 'portfolio_concentration', label: '組合集中度' },
+  { value: 'portfolio_drawdown', label: '組合回撤' },
+  { value: 'portfolio_price_stale', label: '組合價格狀態' },
 ];
 
 const MARKET_ALERT_TYPE_OPTIONS = [
-  { value: 'market_light_status', label: '大盘红绿灯状态' },
-  { value: 'market_light_score_drop', label: '大盘红绿灯分数下降' },
+  { value: 'market_light_status', label: '大盤紅綠燈狀態' },
+  { value: 'market_light_score_drop', label: '大盤紅綠燈分數下降' },
 ];
 
 const TARGET_SCOPE_OPTIONS = [
-  { value: 'single_symbol', label: '单标的' },
-  { value: 'watchlist', label: '自选股' },
-  { value: 'portfolio_holdings', label: '持仓标的' },
-  { value: 'portfolio_account', label: '持仓账户' },
-  { value: 'market', label: '大盘市场' },
+  { value: 'single_symbol', label: '單標的' },
+  { value: 'watchlist', label: '自選股' },
+  { value: 'portfolio_holdings', label: '持倉標的' },
+  { value: 'portfolio_account', label: '持倉賬戶' },
+  { value: 'market', label: '大盤市場' },
 ];
 
 const SEVERITY_OPTIONS = [
   { value: 'info', label: '提示' },
   { value: 'warning', label: '警告' },
-  { value: 'critical', label: '严重' },
+  { value: 'critical', label: '嚴重' },
 ];
 
 const PRICE_DIRECTION_OPTIONS = [
@@ -74,8 +74,8 @@ const PRICE_DIRECTION_OPTIONS = [
 ];
 
 const CHANGE_DIRECTION_OPTIONS = [
-  { value: 'up', label: '上涨达到' },
-  { value: 'down', label: '下跌达到' },
+  { value: 'up', label: '上漲達到' },
+  { value: 'down', label: '下跌達到' },
 ];
 
 const THRESHOLD_DIRECTION_OPTIONS = [
@@ -89,14 +89,14 @@ const CROSS_DIRECTION_OPTIONS = [
 ];
 
 const STOP_LOSS_MODE_OPTIONS = [
-  { value: 'near', label: '接近止损' },
-  { value: 'breach', label: '已触发止损' },
+  { value: 'near', label: '接近止損' },
+  { value: 'breach', label: '已觸發止損' },
 ];
 
 
 const MARKET_LIGHT_STATUS_OPTIONS: Array<{ value: MarketLightStatus; label: string }> = [
-  { value: 'red', label: '红灯' },
-  { value: 'yellow', label: '黄灯' },
+  { value: 'red', label: '紅燈' },
+  { value: 'yellow', label: '黃燈' },
 ];
 
 const MAX_REQUESTED_DAYS = 365;

@@ -46,7 +46,7 @@ const matchesFilter = (event: RunFlowEvent, filter: EventFilter): boolean => {
       || /failed|error|timeout/.test(text);
   }
   if (filter === 'fallback') {
-    return /fallback|retry|降级|重试/.test(text);
+    return /fallback|retry|降級|重試/.test(text);
   }
   return /cancel|取消/.test(text);
 };

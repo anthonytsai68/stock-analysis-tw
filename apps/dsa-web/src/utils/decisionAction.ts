@@ -14,14 +14,14 @@ export type DecisionActionLabelTextKey =
 export type DecisionActionLabelTranslator = (key: DecisionActionLabelTextKey) => string;
 
 export const DEFAULT_DECISION_ACTION_LABELS: DecisionActionLabelMap = {
-  buy: '买入',
-  add: '加仓',
+  buy: '買入',
+  add: '加倉',
   hold: '持有',
-  reduce: '减仓',
-  sell: '卖出',
-  watch: '观望',
-  avoid: '回避',
-  alert: '预警',
+  reduce: '減倉',
+  sell: '賣出',
+  watch: '觀望',
+  avoid: '迴避',
+  alert: '預警',
 };
 
 const resolveActionLabels = (labels?: Partial<DecisionActionLabelMap>): DecisionActionLabelMap => ({
@@ -102,26 +102,26 @@ export const getLegacyDecisionAction = (advice?: string | null): DecisionAction 
 
   if (
     includesAny(normalized, [
-      '暂不买入',
-      '不要买入',
-      '不宜买入',
-      '先不买入',
-      '无需买入',
-      '无须买入',
-      '不建议建仓',
-      '暂不建仓',
-      '不要建仓',
-      '不宜建仓',
-      '先不建仓',
-      '无需建仓',
-      '无须建仓',
-      '不建议布局',
-      '暂不布局',
-      '不要布局',
-      '不宜布局',
-      '先不布局',
-      '无需布局',
-      '无须布局',
+      '暫不買入',
+      '不要買入',
+      '不宜買入',
+      '先不買入',
+      '無需買入',
+      '無須買入',
+      '不建議建倉',
+      '暫不建倉',
+      '不要建倉',
+      '不宜建倉',
+      '先不建倉',
+      '無需建倉',
+      '無須建倉',
+      '不建議佈局',
+      '暫不佈局',
+      '不要佈局',
+      '不宜佈局',
+      '先不佈局',
+      '無需佈局',
+      '無須佈局',
     ]) ||
     matchesEnglishNegatedAction(lower, ['buy'])
   ) {
@@ -129,36 +129,36 @@ export const getLegacyDecisionAction = (advice?: string | null): DecisionAction 
   }
   if (
     includesAny(normalized, [
-      '不建议加仓',
-      '无需加仓',
-      '无须加仓',
-      '不要加仓',
-      '不宜加仓',
-      '暂不加仓',
-      '不建议增持',
-      '无需增持',
-      '无须增持',
+      '不建議加倉',
+      '無需加倉',
+      '無須加倉',
+      '不要加倉',
+      '不宜加倉',
+      '暫不加倉',
+      '不建議增持',
+      '無需增持',
+      '無須增持',
       '不要增持',
       '不宜增持',
-      '暂不增持',
-      '不建议卖出',
-      '无需卖出',
-      '无须卖出',
-      '不要卖出',
-      '不宜卖出',
-      '暂不卖出',
-      '不建议减仓',
-      '无需减仓',
-      '无须减仓',
-      '不要减仓',
-      '不宜减仓',
-      '暂不减仓',
-      '不建议清仓',
-      '无需清仓',
-      '无须清仓',
-      '不要清仓',
-      '不宜清仓',
-      '暂不清仓',
+      '暫不增持',
+      '不建議賣出',
+      '無需賣出',
+      '無須賣出',
+      '不要賣出',
+      '不宜賣出',
+      '暫不賣出',
+      '不建議減倉',
+      '無需減倉',
+      '無須減倉',
+      '不要減倉',
+      '不宜減倉',
+      '暫不減倉',
+      '不建議清倉',
+      '無需清倉',
+      '無須清倉',
+      '不要清倉',
+      '不宜清倉',
+      '暫不清倉',
     ]) ||
     hasEnglishAvoidedHoldAction(lower) ||
     matchesEnglishNegatedAction(lower, ['add', 'accumulate', 'sell', 'reduce', 'trim'])
@@ -167,17 +167,17 @@ export const getLegacyDecisionAction = (advice?: string | null): DecisionAction 
   }
   const guardMatches = new Set<DecisionAction>();
   if (
-    normalized.includes('不建议买入') ||
-    normalized.includes('避免买入') ||
-    normalized.includes('回避') ||
-    normalized.includes('规避') ||
+    normalized.includes('不建議買入') ||
+    normalized.includes('避免買入') ||
+    normalized.includes('迴避') ||
+    normalized.includes('規避') ||
     matchesEnglishTerm(lower, ['avoid'])
   ) {
     guardMatches.add('avoid');
   }
   if (
-    normalized.includes('风险预警') ||
-    normalized.includes('触发告警') ||
+    normalized.includes('風險預警') ||
+    normalized.includes('觸發告警') ||
     normalized.includes('警惕') ||
     lower.includes('risk alert') ||
     matchesEnglishTerm(lower, ['alert'])
@@ -192,22 +192,22 @@ export const getLegacyDecisionAction = (advice?: string | null): DecisionAction 
   }
 
   const matches = new Set<DecisionAction>();
-  if (normalized.includes('加仓') || normalized.includes('增持') || matchesEnglishTerm(lower, ['add', 'accumulate'])) {
+  if (normalized.includes('加倉') || normalized.includes('增持') || matchesEnglishTerm(lower, ['add', 'accumulate'])) {
     matches.add('add');
   }
-  if (normalized.includes('减仓') || matchesEnglishTerm(lower, ['reduce', 'trim'])) {
+  if (normalized.includes('減倉') || matchesEnglishTerm(lower, ['reduce', 'trim'])) {
     matches.add('reduce');
   }
-  if (normalized.includes('强烈卖出') || normalized.includes('卖出') || normalized.includes('清仓') || matchesEnglishTerm(lower, ['sell'])) {
+  if (normalized.includes('強烈賣出') || normalized.includes('賣出') || normalized.includes('清倉') || matchesEnglishTerm(lower, ['sell'])) {
     matches.add('sell');
   }
-  if (normalized.includes('持有') || normalized.includes('洗盘观察') || matchesEnglishTerm(lower, ['hold'])) {
+  if (normalized.includes('持有') || normalized.includes('洗盤觀察') || matchesEnglishTerm(lower, ['hold'])) {
     matches.add('hold');
   }
-  if (normalized.includes('观望') || normalized.includes('等待') || matchesEnglishTerm(lower, ['watch', 'wait'])) {
+  if (normalized.includes('觀望') || normalized.includes('等待') || matchesEnglishTerm(lower, ['watch', 'wait'])) {
     matches.add('watch');
   }
-  if (normalized.includes('强烈买入') || normalized.includes('买入') || normalized.includes('布局') || normalized.includes('建仓') || matchesEnglishTerm(lower, ['buy'])) {
+  if (normalized.includes('強烈買入') || normalized.includes('買入') || normalized.includes('佈局') || normalized.includes('建倉') || matchesEnglishTerm(lower, ['buy'])) {
     matches.add('buy');
   }
 
@@ -221,7 +221,7 @@ export const getDecisionActionLabel = (
   action?: DecisionAction | null,
   actionLabel?: string | null,
   legacyAdvice?: string | null,
-  emptyLabel: string | null = '建议',
+  emptyLabel: string | null = '建議',
   labels?: Partial<DecisionActionLabelMap>,
 ): string | null => {
   const actionLabels = resolveActionLabels(labels);
@@ -241,9 +241,9 @@ export const getDecisionActionTone = (
   const label = actionLabel?.trim() || '';
   if (label) {
     const lowerLabel = normalizeEnglishAdvice(label);
-    if (label.includes('买') || label.includes('加仓') || label.includes('持有')) return 'success';
-    if (label.includes('卖') || label.includes('减仓') || label.includes('清仓')) return 'danger';
-    if (label.includes('观望') || label.includes('等待') || label.includes('回避') || label.includes('预警')) {
+    if (label.includes('買') || label.includes('加倉') || label.includes('持有')) return 'success';
+    if (label.includes('賣') || label.includes('減倉') || label.includes('清倉')) return 'danger';
+    if (label.includes('觀望') || label.includes('等待') || label.includes('迴避') || label.includes('預警')) {
       return 'warning';
     }
     if (matchesEnglishTerm(lowerLabel, ['buy', 'add', 'hold'])) return 'success';

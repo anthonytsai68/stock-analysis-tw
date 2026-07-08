@@ -55,16 +55,16 @@ const HERMES_CHANNEL_NAME = 'hermes';
 const HERMES_DEFAULT_MODEL = 'hermes-agent';
 
 const RUNTIME_CAPABILITY_OPTIONS: Array<{ value: LLMCapabilityCheck; label: string; hint: string }> = [
-  { value: 'json', label: 'JSON', hint: '检测 response_format JSON 输出是否可用。' },
-  { value: 'tools', label: 'Tools', hint: '检测 function/tool calling 是否可用。' },
-  { value: 'stream', label: 'Stream', hint: '检测流式输出是否能返回有效 chunk。' },
-  { value: 'vision', label: 'Vision', hint: '检测当前模型是否接受 image_url 输入。' },
+  { value: 'json', label: 'JSON', hint: '檢測 response_format JSON 輸出是否可用。' },
+  { value: 'tools', label: 'Tools', hint: '檢測 function/tool calling 是否可用。' },
+  { value: 'stream', label: 'Stream', hint: '檢測流式輸出是否能返回有效 chunk。' },
+  { value: 'vision', label: 'Vision', hint: '檢測當前模型是否接受 image_url 輸入。' },
 ];
 
 const CAPABILITY_STATUS_LABELS: Record<LLMCapabilityCheckResult['status'], string> = {
-  passed: '通过',
-  failed: '失败',
-  skipped: '跳过',
+  passed: '通過',
+  failed: '失敗',
+  skipped: '跳過',
 };
 
 const isHermesChannel = (channel: Pick<ChannelConfig, 'name'>): boolean => (
@@ -113,7 +113,7 @@ const hasRuntimeOnlyMaskedHermesSecret = (
   isHermesChannel(channel) && channel.apiKey === maskToken && !hasPersistedSecret
 );
 
-const RUNTIME_ONLY_HERMES_SECRET_MESSAGE = '运行时注入的 Hermes Key 不会回传；如需在设置页测试，请重新输入 Key 或保存到 .env。';
+const RUNTIME_ONLY_HERMES_SECRET_MESSAGE = '運行時注入的 Hermes Key 不會回傳；如需在設置頁測試，請重新輸入 Key 或保存到 .env。';
 
 interface ChannelConfig {
   id: string;
@@ -188,7 +188,7 @@ const LLM_CHANNEL_HELP_DOCS = [
     href: 'https://github.com/ZhuLinsen/daily_stock_analysis/blob/main/docs/LLM_CONFIG_GUIDE.md',
   },
   {
-    label: 'LLM 服务商配置速查',
+    label: 'LLM 服務商配置速查',
     href: 'https://github.com/ZhuLinsen/daily_stock_analysis/blob/main/docs/llm-providers.md',
   },
 ];
@@ -480,27 +480,27 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             </Badge>
           </div>
           <p className="mt-0.5 truncate text-[11px] text-secondary-text">
-            {modelCount > 0 ? `${modelCount} 个模型已配置` : '未配置模型'}
+            {modelCount > 0 ? `${modelCount} 個模型已配置` : '未配置模型'}
           </p>
         </div>
 
         <span className="flex shrink-0 items-center gap-2">
           {testState?.status === 'success' ? (
-            <Tooltip content="连接正常">
+            <Tooltip content="連接正常">
               <span className="inline-flex">
                 <StatusDot tone="success" />
               </span>
             </Tooltip>
           ) : null}
           {testState?.status === 'error' ? (
-            <Tooltip content="连接失败">
+            <Tooltip content="連接失敗">
               <span className="inline-flex">
                 <StatusDot tone="danger" />
               </span>
             </Tooltip>
           ) : null}
           {testState?.status === 'loading' ? (
-            <Tooltip content="测试中">
+            <Tooltip content="測試中">
               <span className="inline-flex">
                 <StatusDot tone="warning" pulse />
               </span>
@@ -509,12 +509,12 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
           {!hasKey && channel.protocol !== 'ollama' ? <Badge variant="warning">未填 Key</Badge> : null}
           {testState?.status !== 'idle' ? (
             <Badge variant={statusVariant}>
-              {testState?.status === 'success' ? '连接正常' : testState?.status === 'error' ? '连接失败' : '测试中'}
+              {testState?.status === 'success' ? '連接正常' : testState?.status === 'error' ? '連接失敗' : '測試中'}
             </Badge>
           ) : null}
         </span>
 
-        <Tooltip content="删除渠道">
+        <Tooltip content="刪除渠道">
           <span className="inline-flex">
             <Button
               type="button"
@@ -539,7 +539,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             <div>
               <HelpLabel
                 htmlFor={channelNameInputId}
-                label="渠道名称"
+                label="渠道名稱"
                 fieldKey="LLM_CHANNEL_NAME"
                 helpKey="settings.llm_channel.channel_name"
                 examples={['LLM_CHANNELS=deepseek,aihubmix', 'LLM_DEEPSEEK_MODELS=deepseek-v4-flash,deepseek-v4-pro']}
@@ -555,7 +555,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             <div className="space-y-2">
               <HelpLabel
                 htmlFor={protocolInputId}
-                label="协议"
+                label="協議"
                 fieldKey="LLM_CHANNEL_PROTOCOL"
                 helpKey="settings.llm_channel.protocol"
                 examples={['LLM_DEEPSEEK_PROTOCOL=deepseek', 'LLM_OPENROUTER_PROTOCOL=openai']}
@@ -566,7 +566,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
                 onChange={(v) => onUpdate(index, 'protocol', normalizeProtocol(v))}
                 options={PROTOCOL_OPTIONS}
                 disabled={busy}
-                placeholder="选择协议"
+                placeholder="選擇協議"
               />
             </div>
           </div>
@@ -595,7 +595,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
           {showProviderTemplateDetails ? (
             <div className="space-y-2 rounded-xl border border-[var(--settings-border)] bg-[var(--settings-surface-hover)] p-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[11px] font-medium text-muted-text">配置参考</span>
+                <span className="text-[11px] font-medium text-muted-text">配置參考</span>
                 {providerCapabilities.map((capability) => {
                   const capabilityMeta = LLM_PROVIDER_CAPABILITY_LABELS[capability];
                   return (
@@ -614,7 +614,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
               ) : null}
               {providerSources.length > 0 ? (
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5 text-secondary-text">
-                  <span>官方来源：</span>
+                  <span>官方來源：</span>
                   {providerSources.map((source) => (
                     <a
                       key={source.url}
@@ -629,7 +629,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
                 </p>
               ) : null}
               <p className="text-[11px] leading-5 text-muted-text">
-                能力标签仅用于配置参考，不代表运行时能力已验证通过。
+                能力標籤僅用於配置參考，不代表運行時能力已驗證通過。
               </p>
             </div>
           ) : null}
@@ -652,7 +652,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             value={channel.apiKey}
             disabled={busy}
             onChange={(e) => onUpdate(index, 'apiKey', e.target.value)}
-            placeholder={channel.protocol === 'ollama' ? '本地 Ollama 可留空' : '支持多个 Key 逗号分隔'}
+            placeholder={channel.protocol === 'ollama' ? '本地 Ollama 可留空' : '支持多個 Key 逗號分隔'}
           />
           </div>
 
@@ -666,7 +666,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
                 disabled={busy}
                 onClick={() => onDiscoverModels(channel)}
               >
-                {discoveryState?.status === 'loading' ? '获取中...' : '获取模型'}
+                {discoveryState?.status === 'loading' ? '獲取中...' : '獲取模型'}
               </Button>
               <span className={`text-xs ${
                 discoveryState?.status === 'success'
@@ -676,7 +676,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
                     : 'text-muted-text'
               }`}
               >
-                {discoveryState?.text || '支持 `/models` 的 OpenAI Compatible 渠道可自动拉取模型。'}
+                {discoveryState?.text || '支持 `/models` 的 OpenAI Compatible 渠道可自動拉取模型。'}
               </span>
             </div>
             {discoveryState?.hint ? (
@@ -688,7 +688,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             {discoveredModels.length > 0 ? (
               <div>
                 <HelpLabel
-                  label="可选模型（可多选）"
+                  label="可選模型（可多選）"
                   fieldKey="LLM_CHANNEL_DISCOVERED_MODELS"
                   helpKey="settings.llm_channel.models"
                   examples={['LLM_DEEPSEEK_MODELS=deepseek-v4-flash,deepseek-v4-pro']}
@@ -715,7 +715,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             <div>
               <HelpLabel
                 htmlFor={modelsInputId}
-                label={discoveredModels.length > 0 ? '手动模型（逗号分隔）' : '模型（逗号分隔）'}
+                label={discoveredModels.length > 0 ? '手動模型（逗號分隔）' : '模型（逗號分隔）'}
                 fieldKey="LLM_CHANNEL_MODELS"
                 helpKey="settings.llm_channel.models"
                 examples={['LLM_DEEPSEEK_MODELS=deepseek-v4-flash,deepseek-v4-pro', 'LLM_OLLAMA_MODELS=qwen3:8b,llama3.1:8b']}
@@ -728,15 +728,15 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
               placeholder={preset?.placeholderModels || MODEL_PLACEHOLDERS_BY_PROTOCOL[channel.protocol]}
               hint={
                 discoveredModels.length > 0
-                  ? '如有自定义模型名未出现在列表中，可继续手动补充，保存格式仍为逗号分隔。'
-                  : '若渠道不支持自动发现或请求失败，可直接手动填写模型列表。'
+                  ? '如有自定義模型名未出現在列表中，可繼續手動補充，保存格式仍為逗號分隔。'
+                  : '若渠道不支持自動發現或請求失敗，可直接手動填寫模型列表。'
               }
             />
             </div>
 
             {manualOnlyModels.length > 0 ? (
               <p className="text-[11px] text-secondary-text">
-                额外手动模型：{manualOnlyModels.join('，')}
+                額外手動模型：{manualOnlyModels.join('，')}
               </p>
             ) : null}
           </div>
@@ -750,7 +750,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
               disabled={busy}
               onClick={() => onTest(channel, index)}
             >
-              {testState?.status === 'loading' ? '测试中...' : '测试连接'}
+              {testState?.status === 'loading' ? '測試中...' : '測試連接'}
             </Button>
             {testState?.text ? (
               <div className="space-y-1">
@@ -766,7 +766,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
                 </span>
                 {selectedModels[0] ? (
                   <p className="text-[11px] text-secondary-text">
-                    基础连接测试默认使用模型列表首项：{selectedModels[0]}
+                    基礎連接測試默認使用模型列表首項：{selectedModels[0]}
                   </p>
                 ) : null}
                 {testState.hint ? (
@@ -782,17 +782,17 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <p className="text-[11px] font-medium text-muted-text">运行时能力检测（可选）</p>
+                  <p className="text-[11px] font-medium text-muted-text">運行時能力檢測（可選）</p>
                   <SettingsHelpButton
                     fieldKey="LLM_CHANNEL_CAPABILITY_CHECKS"
-                    title="运行时能力检测"
+                    title="運行時能力檢測"
                     helpKey="settings.llm_channel.capability_checks"
                     examples={['JSON / Tools / Stream / Vision']}
                     docs={LLM_CHANNEL_HELP_DOCS}
                   />
                 </div>
                 <p className="mt-0.5 text-[11px] text-secondary-text">
-                  仅在手动触发时发起真实 LLM 请求；多选可能需要 20-40 秒。
+                  僅在手動觸發時發起真實 LLM 請求；多選可能需要 20-40 秒。
                 </p>
               </div>
               <Button
@@ -803,7 +803,7 @@ const ChannelRow: React.FC<ChannelRowProps> = ({
                 disabled={busy || capabilityBusy || selectedCapabilities.length === 0}
                 onClick={() => onCheckCapabilities(channel)}
               >
-                {capabilityBusy ? '检测中...' : '检测能力'}
+                {capabilityBusy ? '檢測中...' : '檢測能力'}
               </Button>
             </div>
 
@@ -1058,7 +1058,7 @@ function buildRouteProvenanceMap(channels: ChannelConfig[]): Map<string, RoutePr
 function buildModelOptions(models: string[], selectedModel: string, autoLabel: string): Array<{ value: string; label: string }> {
   const options: Array<{ value: string; label: string }> = [{ value: '', label: autoLabel }];
   if (selectedModel && !models.includes(selectedModel)) {
-    options.push({ value: selectedModel, label: `${selectedModel}（当前配置）` });
+    options.push({ value: selectedModel, label: `${selectedModel}（當前配置）` });
   }
   for (const model of models) {
     options.push({ value: model, label: model });
@@ -1067,9 +1067,9 @@ function buildModelOptions(models: string[], selectedModel: string, autoLabel: s
 }
 
 const LLM_STAGE_LABELS: Record<string, string> = {
-  model_discovery: '模型发现',
-  chat_completion: '聊天调用',
-  response_parse: '响应解析',
+  model_discovery: '模型發現',
+  chat_completion: '聊天調用',
+  response_parse: '響應解析',
   capability_json: 'JSON 能力',
   capability_tools: 'Tools 能力',
   capability_stream: 'Stream 能力',
@@ -1077,52 +1077,52 @@ const LLM_STAGE_LABELS: Record<string, string> = {
 };
 
 const LLM_ERROR_LABELS: Record<string, string> = {
-  auth: '鉴权失败',
-  timeout: '请求超时',
-  quota: '额度或限流',
+  auth: '鑑權失敗',
+  timeout: '請求超時',
+  quota: '額度或限流',
   model_not_found: '模型不可用',
-  request_blocked: '请求被拦截',
-  empty_response: '空响应',
-  format_error: '格式异常',
-  network_error: '网络异常',
-  invalid_config: '配置无效',
-  unsupported_protocol: '协议暂不支持',
+  request_blocked: '請求被攔截',
+  empty_response: '空響應',
+  format_error: '格式異常',
+  network_error: '網絡異常',
+  invalid_config: '配置無效',
+  unsupported_protocol: '協議暫不支持',
   capability_unsupported: '能力不支持',
-  skipped: '已跳过',
+  skipped: '已跳過',
 };
 
 const LLM_TROUBLESHOOTING_HINTS: Record<string, string> = {
-  auth: '请检查 API Key 是否正确、是否有多余空格，以及当前渠道是否需要额外组织/项目权限。',
-  timeout: '可重试；若持续超时，请检查 Base URL、网络代理、服务商可用区或本地防火墙。',
-  quota: '请检查余额、套餐额度、RPM/TPM 限流或并发设置，必要时稍后重试。',
-  model_not_found: '请确认模型名与渠道协议匹配，并先用“获取模型”核对该渠道实际可用模型列表。',
-  empty_response: '渠道已连通但未返回正文；可尝试切换兼容模型、关闭额外响应模式后再测试。',
-  network_error: '请检查 Base URL、代理、TLS/证书、中转网关或本地网络策略，并可稍后重试。',
-  invalid_config: '先补齐协议、Base URL、API Key 和模型配置，再执行一键测试。',
-  unsupported_protocol: '当前仅对 OpenAI Compatible / DeepSeek 渠道提供自动模型发现，请改为手动维护模型列表。',
+  auth: '請檢查 API Key 是否正確、是否有多餘空格，以及當前渠道是否需要額外組織/項目權限。',
+  timeout: '可重試；若持續超時，請檢查 Base URL、網絡代理、服務商可用區或本地防火牆。',
+  quota: '請檢查餘額、套餐額度、RPM/TPM 限流或併發設置，必要時稍後重試。',
+  model_not_found: '請確認模型名與渠道協議匹配，並先用“獲取模型”核對該渠道實際可用模型列表。',
+  empty_response: '渠道已連通但未返回正文；可嘗試切換兼容模型、關閉額外響應模式後再測試。',
+  network_error: '請檢查 Base URL、代理、TLS/證書、中轉網關或本地網絡策略，並可稍後重試。',
+  invalid_config: '先補齊協議、Base URL、API Key 和模型配置，再執行一鍵測試。',
+  unsupported_protocol: '當前僅對 OpenAI Compatible / DeepSeek 渠道提供自動模型發現，請改為手動維護模型列表。',
 };
 
 const LLM_REASON_HINTS: Record<string, string> = {
-  missing_api_key: 'API Key 为空，或逗号分隔后没有任何可用 Key；请填入至少一个有效 Key 后再测试。',
-  api_key_rejected: '服务商拒绝了当前 API Key；请检查 Key、组织/项目权限、区域和账号状态。',
-  rate_limit: '服务商触发 RPM/TPM 或并发限流；请降低请求频率或稍后重试。',
-  insufficient_balance: '服务商返回余额、账单或额度不足；请检查账户余额和套餐状态。',
-  quota_exceeded: '服务商返回配额已耗尽；请确认账号套餐、余量和项目额度。',
-  provider_blocked: '请求被服务商或中转网关拦截；请检查账号风控、地域限制、模型权限、代理商网关策略、内容安全策略或请求来源限制。',
-  dns_error: '域名解析失败；请检查 Base URL 域名、网络代理和 DNS 配置。',
-  tls_error: 'TLS/证书握手失败；请检查 HTTPS 证书、中转网关或公司代理策略。',
-  connection_refused: '目标服务拒绝连接；请确认 Base URL 端口、服务进程和防火墙配置。',
-  model_access_denied: '当前账号无法使用该模型；请确认模型是否已开通、账号是否可见，或模型是否已被禁用。',
-  provider_prefix_mismatch: '模型 provider 前缀与当前渠道不匹配；请确认模型名是否应使用该渠道的 OpenAI-compatible 路由。',
-  capability_unsupported: '当前模型或兼容层不支持该能力；这不影响基础文本连接，可换模型或关闭该能力依赖。',
+  missing_api_key: 'API Key 為空，或逗號分隔後沒有任何可用 Key；請填入至少一個有效 Key 後再測試。',
+  api_key_rejected: '服務商拒絕了當前 API Key；請檢查 Key、組織/項目權限、區域和賬號狀態。',
+  rate_limit: '服務商觸發 RPM/TPM 或併發限流；請降低請求頻率或稍後重試。',
+  insufficient_balance: '服務商返回餘額、賬單或額度不足；請檢查賬戶餘額和套餐狀態。',
+  quota_exceeded: '服務商返回配額已耗盡；請確認賬號套餐、餘量和項目額度。',
+  provider_blocked: '請求被服務商或中轉網關攔截；請檢查賬號風控、地域限制、模型權限、代理商網關策略、內容安全策略或請求來源限制。',
+  dns_error: '域名解析失敗；請檢查 Base URL 域名、網絡代理和 DNS 配置。',
+  tls_error: 'TLS/證書握手失敗；請檢查 HTTPS 證書、中轉網關或公司代理策略。',
+  connection_refused: '目標服務拒絕連接；請確認 Base URL 端口、服務進程和防火牆配置。',
+  model_access_denied: '當前賬號無法使用該模型；請確認模型是否已開通、賬號是否可見，或模型是否已被禁用。',
+  provider_prefix_mismatch: '模型 provider 前綴與當前渠道不匹配；請確認模型名是否應使用該渠道的 OpenAI-compatible 路由。',
+  capability_unsupported: '當前模型或兼容層不支持該能力；這不影響基礎文本連接，可換模型或關閉該能力依賴。',
 };
 
 function getLlmStageLabel(stage?: string | null): string {
-  return LLM_STAGE_LABELS[stage || ''] || '连接测试';
+  return LLM_STAGE_LABELS[stage || ''] || '連接測試';
 }
 
 function getLlmErrorCodeLabel(code?: string | null): string {
-  return LLM_ERROR_LABELS[code || ''] || '测试失败';
+  return LLM_ERROR_LABELS[code || ''] || '測試失敗';
 }
 
 function getLlmTroubleshootingHint(
@@ -1137,11 +1137,11 @@ function getLlmTroubleshootingHint(
   }
   if (code === 'format_error') {
     return context === 'discovery' || stage === 'model_discovery'
-      ? '该渠道返回的 /models 响应格式不兼容，请改为手动填写模型列表。'
-      : '返回结构与预期不一致，请确认该渠道兼容 Chat Completions 接口。';
+      ? '該渠道返回的 /models 響應格式不兼容，請改為手動填寫模型列表。'
+      : '返回結構與預期不一致，請確認該渠道兼容 Chat Completions 接口。';
   }
   if (code === 'empty_response' && (context === 'discovery' || stage === 'model_discovery')) {
-    return '该渠道的 /models 接口未返回可用模型 ID；请检查 Base URL 是否指向兼容的模型列表接口，或改为手动填写模型列表。';
+    return '該渠道的 /models 接口未返回可用模型 ID；請檢查 Base URL 是否指向兼容的模型列表接口，或改為手動填寫模型列表。';
   }
   return LLM_TROUBLESHOOTING_HINTS[code || ''];
 }
@@ -1155,13 +1155,13 @@ function buildLlmTestHint(result: {
   const reason = typeof result.details?.reason === 'string' ? result.details.reason : '';
   const detailsModel = typeof result.details?.model === 'string' ? result.details.model : '';
   const testedModel = result.resolvedModel || detailsModel;
-  const modelHint = testedModel ? `本次测试模型：${testedModel}。` : '';
-  const scopeInfo = '基础连接测试默认只测试模型列表中的第一个模型。';
+  const modelHint = testedModel ? `本次測試模型：${testedModel}。` : '';
+  const scopeInfo = '基礎連接測試默認只測試模型列表中的第一個模型。';
   const shouldSuggestModelListChange = reason === 'model_access_denied'
     || reason === 'model_not_found'
     || (result.errorCode === 'model_not_found' && !reason);
   const modelActionHint = shouldSuggestModelListChange
-    ? '若该模型不可用，请调整模型顺序或移除不可用模型后重试。'
+    ? '若該模型不可用，請調整模型順序或移除不可用模型後重試。'
     : '';
   const troubleshootingHint = getLlmTroubleshootingHint(result.errorCode, result.stage, 'test', result.details);
   return [modelHint, scopeInfo, modelActionHint, troubleshootingHint].filter(Boolean).join(' ') || undefined;
@@ -1174,7 +1174,7 @@ function buildLlmFailureText(result: {
   errorCode?: string | null;
 }): string {
   const prefix = `${getLlmStageLabel(result.stage)} · ${getLlmErrorCodeLabel(result.errorCode)}`;
-  const summary = result.message || '测试失败';
+  const summary = result.message || '測試失敗';
   if (result.error && result.error !== result.message) {
     return `${prefix}：${summary}（原始摘要：${result.error}）`;
   }
@@ -1192,7 +1192,7 @@ function summarizeCapabilityResults(results: Partial<Record<LLMCapabilityCheck, 
   const passed = values.filter((result) => result?.status === 'passed').length;
   const failed = values.filter((result) => result?.status === 'failed').length;
   const skipped = values.filter((result) => result?.status === 'skipped').length;
-  return `能力检测完成：${passed} 通过 / ${failed} 失败 / ${skipped} 跳过`;
+  return `能力檢測完成：${passed} 通過 / ${failed} 失敗 / ${skipped} 跳過`;
 }
 
 function getFirstCapabilityHint(
@@ -1865,7 +1865,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
   const handleSave = async () => {
     const hasEmptyName = channels.some((channel) => !channel.name.trim());
     if (hasEmptyName) {
-      setSaveMessage({ type: 'local-error', text: '渠道名称不能为空，且只能包含字母、数字或下划线。' });
+      setSaveMessage({ type: 'local-error', text: '渠道名稱不能為空，且只能包含字母、數字或下劃線。' });
       return;
     }
 
@@ -1878,7 +1878,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         return origin?.hasHermes && origin.hasNonHermes;
       });
       if (mixedPrimary || mixedFallback) {
-        setSaveMessage({ type: 'local-error', text: 'Mixed Hermes/non-Hermes route 暂不支持作为主生成或备选模型，请选择纯 Hermes 或纯非 Hermes route。' });
+        setSaveMessage({ type: 'local-error', text: 'Mixed Hermes/non-Hermes route 暫不支持作為主生成或備選模型，請選擇純 Hermes 或純非 Hermes route。' });
         return;
       }
 
@@ -1889,7 +1889,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         || runtimeConfig.fallbackModels.some((model) => hasCanonicalRouteAliasMismatch(model, availableModels))
       );
       if (nonCanonicalRouteAlias) {
-        setSaveMessage({ type: 'local-error', text: '当前运行时模型使用非规范 route alias，请从下拉框重新选择规范模型。' });
+        setSaveMessage({ type: 'local-error', text: '當前運行時模型使用非規範 route alias，請從下拉框重新選擇規範模型。' });
         return;
       }
     }
@@ -1905,14 +1905,14 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
       const invalidPrimaryModel = runtimeConfigForSave.primaryModel
         && !isRuntimeModelAvailable(runtimeConfigForSave.primaryModel, availableModels, savedItemMap);
       if (invalidPrimaryModel) {
-        setSaveMessage({ type: 'local-error', text: '当前主模型不在已启用渠道的模型列表中，请重新选择。' });
+        setSaveMessage({ type: 'local-error', text: '當前主模型不在已啟用渠道的模型列表中，請重新選擇。' });
         return;
       }
 
       const invalidAgentPrimaryModel = runtimeConfigForSave.agentPrimaryModel
         && !isRuntimeModelAvailable(runtimeConfigForSave.agentPrimaryModel, agentSafeModels, savedItemMap);
       if (invalidAgentPrimaryModel) {
-        setSaveMessage({ type: 'local-error', text: '当前 Agent 主模型没有 Agent-safe 非 Hermes deployment，请重新选择。' });
+        setSaveMessage({ type: 'local-error', text: '當前 Agent 主模型沒有 Agent-safe 非 Hermes deployment，請重新選擇。' });
         return;
       }
 
@@ -1920,14 +1920,14 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         (model) => !isRuntimeModelAvailable(model, availableModels, savedItemMap),
       );
       if (invalidFallbackModel) {
-        setSaveMessage({ type: 'local-error', text: '存在无效的备选模型，请重新选择。' });
+        setSaveMessage({ type: 'local-error', text: '存在無效的備選模型，請重新選擇。' });
         return;
       }
 
       const invalidVisionModel = runtimeConfigForSave.visionModel
         && !isRuntimeModelAvailable(runtimeConfigForSave.visionModel, visionSafeModels, savedItemMap);
       if (invalidVisionModel) {
-        setSaveMessage({ type: 'local-error', text: '当前 Vision 模型不能包含 Hermes deployment，请重新选择纯非 Hermes route。' });
+        setSaveMessage({ type: 'local-error', text: '當前 Vision 模型不能包含 Hermes deployment，請重新選擇純非 Hermes route。' });
         return;
       }
     }
@@ -1980,7 +1980,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
 
     setTestStates((previous) => ({
       ...previous,
-      [index]: { status: 'loading', text: '测试中...' },
+      [index]: { status: 'loading', text: '測試中...' },
     }));
 
     try {
@@ -1995,7 +1995,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
       });
 
       const text = result.success
-        ? `连接成功${result.resolvedModel ? ` · ${result.resolvedModel}` : ''}${result.latencyMs ? ` · ${result.latencyMs} ms` : ''}`
+        ? `連接成功${result.resolvedModel ? ` · ${result.resolvedModel}` : ''}${result.latencyMs ? ` · ${result.latencyMs} ms` : ''}`
         : buildLlmFailureText(result);
       const hint = result.success ? undefined : buildLlmTestHint(result);
 
@@ -2011,7 +2011,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
       const parsed = getParsedApiError(error);
       setTestStates((previous) => ({
         ...previous,
-        [index]: { status: 'error', text: parsed.message || '测试失败' },
+        [index]: { status: 'error', text: parsed.message || '測試失敗' },
       }));
     }
   };
@@ -2039,7 +2039,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
       ...previous,
       [channel.id]: {
         status: 'loading',
-        text: '正在获取模型列表...',
+        text: '正在獲取模型列表...',
         hint: undefined,
         models: previous[channel.id]?.models || [],
       },
@@ -2062,7 +2062,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         [channel.id]: {
           status: result.success ? 'success' : 'error',
           text: result.success
-            ? `已获取 ${result.models.length} 个模型${result.latencyMs ? ` · ${result.latencyMs} ms` : ''}`
+            ? `已獲取 ${result.models.length} 個模型${result.latencyMs ? ` · ${result.latencyMs} ms` : ''}`
             : buildLlmFailureText(result),
           hint: result.success ? undefined : getLlmTroubleshootingHint(result.errorCode, result.stage, 'discovery', result.details),
           models: result.success ? result.models : (previous[channel.id]?.models || []),
@@ -2076,7 +2076,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         ...previous,
         [channel.id]: {
           status: 'error',
-          text: parsed.message || '获取模型失败',
+          text: parsed.message || '獲取模型失敗',
           hint: undefined,
           models: previous[channel.id]?.models || [],
         },
@@ -2134,7 +2134,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
       [channel.id]: {
         selected,
         status: 'loading',
-        text: '正在检测运行时能力...',
+        text: '正在檢測運行時能力...',
         hint: undefined,
         results: {},
       },
@@ -2165,7 +2165,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
           text: Object.keys(capabilityResults).length > 0
             ? summarizeCapabilityResults(capabilityResults)
             : result.success
-              ? '未返回能力检测结果'
+              ? '未返回能力檢測結果'
               : buildLlmFailureText(result),
           hint: getFirstCapabilityHint(capabilityResults)
             || (!result.success ? buildLlmTestHint(result) : undefined),
@@ -2181,7 +2181,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         [channel.id]: {
           selected,
           status: 'error',
-          text: parsed.message || '能力检测失败',
+          text: parsed.message || '能力檢測失敗',
           hint: undefined,
           results: {},
         },
@@ -2230,10 +2230,10 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
             <Badge variant="info" className="settings-accent-badge">渠道管理</Badge>
           </div>
           <p className="text-xs text-muted-text">
-            添加服务商渠道后可自动获取模型列表并多选，也可继续手动填写。配置会自动同步到 .env 文件。
+            添加服務商渠道後可自動獲取模型列表並多選，也可繼續手動填寫。配置會自動同步到 .env 文件。
           </p>
         </div>
-        <span className="text-xs text-muted-text">{isCollapsed ? '▶ 展开' : '▼ 收起'}</span>
+        <span className="text-xs text-muted-text">{isCollapsed ? '▶ 展開' : '▼ 收起'}</span>
       </button>
 
       {!isCollapsed ? (
@@ -2242,9 +2242,9 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h4 className="text-sm font-medium text-foreground">快速添加渠道</h4>
-                <p className="mt-1 text-xs text-secondary-text">先选择预设服务商，再一键创建配置草稿。</p>
+                <p className="mt-1 text-xs text-secondary-text">先選擇預設服務商，再一鍵創建配置草稿。</p>
               </div>
-              <Badge variant="default" className="border-[var(--settings-border)] bg-[var(--settings-surface-hover)] text-muted-text">{channels.length} 个渠道</Badge>
+              <Badge variant="default" className="border-[var(--settings-border)] bg-[var(--settings-surface-hover)] text-muted-text">{channels.length} 個渠道</Badge>
             </div>
             <div className="flex items-center gap-2">
               <Button type="button" variant="settings-primary" className="whitespace-nowrap" disabled={busy} onClick={addChannel}>
@@ -2258,7 +2258,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
                   label: preset.label,
                 }))}
                 disabled={busy}
-                placeholder="选择服务商"
+                placeholder="選擇服務商"
                 className="flex-1"
               />
             </div>
@@ -2268,14 +2268,14 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
             <div className="flex items-center justify-between px-1">
               <span className="text-xs font-medium uppercase tracking-wider text-muted-text">渠道列表</span>
               {channels.length > 0 ? (
-                <span className="text-[10px] text-muted-text">{channels.filter((c) => c.enabled).length}/{channels.length} 已启用</span>
+                <span className="text-[10px] text-muted-text">{channels.filter((c) => c.enabled).length}/{channels.length} 已啟用</span>
               ) : null}
             </div>
 
             {channels.length === 0 ? (
               <div className="settings-surface-overlay-muted rounded-[1.35rem] border border-dashed settings-border-strong px-4 py-10 text-center">
-                <p className="text-sm font-medium text-secondary-text">还没有渠道</p>
-                <p className="mt-1 text-xs text-muted-text">选择服务商预设后点击“添加渠道”即可开始配置。</p>
+                <p className="text-sm font-medium text-secondary-text">還沒有渠道</p>
+                <p className="mt-1 text-xs text-muted-text">選擇服務商預設後點擊“添加渠道”即可開始配置。</p>
               </div>
             ) : channels.map((channel, index) => (
               <ChannelRow
@@ -2304,8 +2304,8 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
             <div className="rounded-[1.35rem] border border-[var(--settings-border)] bg-[var(--settings-surface)] p-4 shadow-soft-card">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <span className="settings-accent-text text-xs font-medium uppercase tracking-wider">运行时参数</span>
-                  <p className="mt-1 text-[11px] text-muted-text">主模型、备选模型、Vision 与 Temperature 会直接写入运行时配置。</p>
+                  <span className="settings-accent-text text-xs font-medium uppercase tracking-wider">運行時參數</span>
+                  <p className="mt-1 text-[11px] text-muted-text">主模型、備選模型、Vision 與 Temperature 會直接寫入運行時配置。</p>
                 </div>
                 <Badge variant="default" className="border-[var(--settings-border)] bg-[var(--settings-surface-hover)] text-muted-text">Runtime</Badge>
               </div>
@@ -2331,13 +2331,13 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
                   <span className="w-8 text-right text-sm text-secondary-text">{runtimeConfig.temperature}</span>
                 </div>
                 <p className="mt-1 text-[11px] text-secondary-text">
-                  控制模型输出随机性，0 为确定性输出，2 为最大随机性，推荐 0.7。
+                  控制模型輸出隨機性，0 為確定性輸出，2 為最大隨機性，推薦 0.7。
                 </p>
               </div>
 
               {availableModels.length === 0 ? (
                 <div className="rounded-xl border border-dashed settings-border-strong settings-surface-overlay-soft px-3 py-2 text-xs text-muted-text">
-                  先添加至少一个已启用渠道并填写模型，下面的主模型 / 备选模型 / Vision 选项才会出现。
+                  先添加至少一個已啟用渠道並填寫模型，下面的主模型 / 備選模型 / Vision 選項才會出現。
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -2354,7 +2354,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
                       id="runtime-primary-model"
                       value={runtimeConfig.primaryModel}
                       onChange={setPrimaryModel}
-                      options={buildModelOptions(availableModels, runtimeConfig.primaryModel, '自动（使用第一个可用模型）')}
+                      options={buildModelOptions(availableModels, runtimeConfig.primaryModel, '自動（使用第一個可用模型）')}
                       disabled={busy}
                       placeholder=""
                     />
@@ -2379,7 +2379,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
                       options={buildModelOptions(
                         agentSafeModels,
                         agentSelectedModelForOptions,
-                        '自动（继承普通分析主模型）',
+                        '自動（繼承普通分析主模型）',
                       )}
                       disabled={busy}
                       placeholder=""
@@ -2388,7 +2388,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
 
                   <div>
                     <HelpLabel
-                      label="备选模型"
+                      label="備選模型"
                       fieldKey="LITELLM_FALLBACK_MODELS"
                       helpKey="settings.llm_channel.fallback_models"
                       examples={['LITELLM_FALLBACK_MODELS=deepseek/deepseek-v4-pro,gemini/gemini-3-flash-preview']}
@@ -2409,7 +2409,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
                       ))}
                     </div>
                     <p className="mt-1 text-[11px] text-secondary-text">
-                      备选模型只会在主模型失败时使用。主模型不会重复加入备选模型。
+                      備選模型只會在主模型失敗時使用。主模型不會重複加入備選模型。
                     </p>
                   </div>
 
@@ -2429,7 +2429,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
                       options={buildModelOptions(
                         visionSafeModels,
                         visionSelectedModelForOptions,
-                        '自动（跟随 Vision 默认逻辑）',
+                        '自動（跟隨 Vision 默認邏輯）',
                       )}
                       disabled={busy}
                       placeholder=""
@@ -2441,7 +2441,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
           ) : (
             <InlineAlert
               variant="warning"
-              message="检测到已配置高级模型路由 YAML：此处仅管理渠道条目和基础连接信息。运行时主模型 / 备选模型 / Vision / Temperature 仍由下方通用字段决定；若 YAML 解析成功，则以其中的路由与可用模型声明为准，本配置不会覆盖 YAML 文件本身。"
+              message="檢測到已配置高級模型路由 YAML：此處僅管理渠道條目和基礎連接信息。運行時主模型 / 備選模型 / Vision / Temperature 仍由下方通用字段決定；若 YAML 解析成功，則以其中的路由與可用模型聲明為準，本配置不會覆蓋 YAML 文件本身。"
               className="rounded-[1.35rem] px-4 py-3 text-xs shadow-none"
             />
           )}
@@ -2456,7 +2456,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
             >
               {isSaving ? '保存中...' : managesRuntimeConfig ? '保存 AI 配置' : '保存渠道配置'}
             </Button>
-            {!hasChanges ? <span className="text-xs text-muted-text">当前没有未保存的改动</span> : null}
+            {!hasChanges ? <span className="text-xs text-muted-text">當前沒有未保存的改動</span> : null}
           </div>
 
           {saveMessage?.type === 'success' ? (
@@ -2470,7 +2470,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
           {saveWarnings.length > 0 ? (
             <InlineAlert
               variant="warning"
-              title="保存后提示"
+              title="保存後提示"
               message={(
                 <div className="space-y-1">
                   {saveWarnings.map((warning) => (

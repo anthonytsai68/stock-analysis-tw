@@ -46,16 +46,16 @@ function renderTestResultMessage(result: AlertRuleTestResponse): React.ReactNode
     <div className="space-y-2">
       <div>
         {result.message}
-        {' · 状态：'}
+        {' · 狀態：'}
         {result.status}
-        {' · 触发：'}
+        {' · 觸發：'}
         {result.triggered ? '是' : '否'}
-        {' · 观察值：'}
+        {' · 觀察值：'}
         {result.observedValue == null ? '--' : String(result.observedValue)}
       </div>
       {result.evaluatedCount != null && result.evaluatedCount > 1 ? (
         <div className="text-xs">
-          评估 {result.evaluatedCount} · 触发 {result.triggeredCount ?? 0} · 降级 {result.degradedCount ?? 0} · 跳过 {result.skippedCount ?? 0}
+          評估 {result.evaluatedCount} · 觸發 {result.triggeredCount ?? 0} · 降級 {result.degradedCount ?? 0} · 跳過 {result.skippedCount ?? 0}
         </div>
       ) : null}
       {targetResults.length > 1 ? (
@@ -76,12 +76,12 @@ function renderTestResultMessage(result: AlertRuleTestResponse): React.ReactNode
 }
 
 const notificationChannelLabel: Record<string, string> = {
-  __cooldown__: '业务冷却',
-  __cooldown_read_failed__: '冷却读取失败',
+  __cooldown__: '業務冷卻',
+  __cooldown_read_failed__: '冷卻讀取失敗',
   __noise_suppressed__: '通知降噪',
-  __no_channel__: '无可用渠道',
-  __dispatch__: '通知调度',
-  __context__: '会话渠道',
+  __no_channel__: '無可用渠道',
+  __dispatch__: '通知調度',
+  __context__: '會話渠道',
 };
 
 function formatNotificationChannel(channel: string): string {
@@ -90,11 +90,11 @@ function formatNotificationChannel(channel: string): string {
 
 function formatNotificationStatus(notification: AlertNotificationItem): string {
   if (notification.success) return '成功';
-  if (notification.errorCode === 'cooldown_active') return '冷却抑制';
-  if (notification.errorCode === 'cooldown_read_failed') return '冷却读取失败';
+  if (notification.errorCode === 'cooldown_active') return '冷卻抑制';
+  if (notification.errorCode === 'cooldown_read_failed') return '冷卻讀取失敗';
   if (notification.errorCode === 'noise_suppressed') return '降噪抑制';
-  if (notification.errorCode === 'no_channel') return '无渠道';
-  return '失败';
+  if (notification.errorCode === 'no_channel') return '無渠道';
+  return '失敗';
 }
 
 const AlertsPage: React.FC = () => {
@@ -206,7 +206,7 @@ const AlertsPage: React.FC = () => {
     setCreateSuccess(null);
     try {
       const created = await alertsApi.createRule(payload);
-      setCreateSuccess(`已创建告警规则「${created.name}」`);
+      setCreateSuccess(`已創建告警規則「${created.name}」`);
       await loadRules(1);
       return true;
     } catch (error) {
@@ -263,18 +263,18 @@ const AlertsPage: React.FC = () => {
       <PageHeader
         eyebrow="Alert Center"
         title="告警中心"
-        description="管理事件告警、日线技术指标、自选股、持仓/账户联动和大盘红绿灯规则，执行一次性测试，并查看后台评估任务记录的触发历史。"
+        description="管理事件告警、日線技術指標、自選股、持倉/賬戶聯動和大盤紅綠燈規則，執行一次性測試，並查看後臺評估任務記錄的觸發歷史。"
       />
 
       {createError ? <ApiErrorAlert error={createError} onDismiss={() => setCreateError(null)} /> : null}
       {createSuccess ? (
         <InlineAlert
-          title="创建成功"
+          title="創建成功"
           message={createSuccess}
           variant="success"
           action={(
             <button type="button" className="text-sm underline" onClick={() => setCreateSuccess(null)}>
-              关闭
+              關閉
             </button>
           )}
         />
@@ -309,7 +309,7 @@ const AlertsPage: React.FC = () => {
           />
           {testResult ? (
             <InlineAlert
-              title="测试结果"
+              title="測試結果"
               variant={testVariant(testResult)}
               message={renderTestResultMessage(testResult)}
             />
@@ -321,13 +321,13 @@ const AlertsPage: React.FC = () => {
       <AlertTriggerHistory triggers={triggers} isLoading={triggersLoading} />
 
       {notificationsError ? <ApiErrorAlert error={notificationsError} onDismiss={() => setNotificationsError(null)} /> : null}
-      <Card title="通知尝试记录" subtitle="通知结果" variant="bordered" padding="md">
-        {notificationsLoading ? <Loading label="正在加载通知尝试记录" /> : null}
+      <Card title="通知嘗試記錄" subtitle="通知結果" variant="bordered" padding="md">
+        {notificationsLoading ? <Loading label="正在加載通知嘗試記錄" /> : null}
         {!notificationsLoading && notifications.length === 0 ? (
           <EmptyState
             icon={<BellRing className="h-6 w-6" />}
-            title="暂无通知尝试记录"
-            description="当前没有可展示的通知尝试明细；告警触发仍会按已配置通知渠道发送。"
+            title="暫無通知嘗試記錄"
+            description="當前沒有可展示的通知嘗試明細；告警觸發仍會按已配置通知渠道發送。"
           />
         ) : null}
         {!notificationsLoading && notifications.length > 0 ? (
@@ -336,11 +336,11 @@ const AlertsPage: React.FC = () => {
               <thead className="border-b border-border/60 text-xs uppercase text-muted-text">
                 <tr>
                   <th className="px-3 py-2 font-medium">渠道</th>
-                  <th className="px-3 py-2 font-medium">状态</th>
-                  <th className="px-3 py-2 font-medium">错误码</th>
-                  <th className="px-3 py-2 font-medium">耗时</th>
-                  <th className="px-3 py-2 font-medium">时间</th>
-                  <th className="px-3 py-2 font-medium">诊断</th>
+                  <th className="px-3 py-2 font-medium">狀態</th>
+                  <th className="px-3 py-2 font-medium">錯誤碼</th>
+                  <th className="px-3 py-2 font-medium">耗時</th>
+                  <th className="px-3 py-2 font-medium">時間</th>
+                  <th className="px-3 py-2 font-medium">診斷</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">

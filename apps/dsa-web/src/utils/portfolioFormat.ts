@@ -54,18 +54,18 @@ export function formatPositionMoney(value: number, row: PortfolioPositionItem): 
 }
 
 export function getPositionPriceLabel(row: PortfolioPositionItem): string {
-  if (!hasPositionPrice(row)) return '缺价';
+  if (!hasPositionPrice(row)) return '缺價';
   if (row.priceSource === 'realtime_quote') {
-    return row.priceProvider ? `实时价 · ${row.priceProvider}` : '实时价';
+    return row.priceProvider ? `實時價 · ${row.priceProvider}` : '實時價';
   }
   if (row.priceSource === 'history_close') {
-    return row.priceStale && row.priceDate ? `收盘价 · ${row.priceDate}` : '收盘价';
+    return row.priceStale && row.priceDate ? `收盤價 · ${row.priceDate}` : '收盤價';
   }
-  return row.priceSource || '未知来源';
+  return row.priceSource || '未知來源';
 }
 
 export function formatSideLabel(value: PortfolioSide): string {
-  return value === 'buy' ? '买入' : '卖出';
+  return value === 'buy' ? '買入' : '賣出';
 }
 
 export function formatCashDirectionLabel(value: PortfolioCashDirection): string {
@@ -73,12 +73,12 @@ export function formatCashDirectionLabel(value: PortfolioCashDirection): string 
 }
 
 export function formatCorporateActionLabel(value: PortfolioCorporateActionType): string {
-  return value === 'cash_dividend' ? '现金分红' : '拆并股调整';
+  return value === 'cash_dividend' ? '現金分紅' : '拆並股調整';
 }
 
 export function formatBrokerLabel(value: string, displayName?: string): string {
   if (displayName && displayName.trim()) return `${value}（${displayName.trim()}）`;
-  if (value === 'huatai') return 'huatai（华泰）';
+  if (value === 'huatai') return 'huatai（華泰）';
   if (value === 'citic') return 'citic（中信）';
   if (value === 'cmb') return 'cmb（招商）';
   return value;
@@ -88,35 +88,35 @@ export function buildFxRefreshFeedback(data: PortfolioFxRefreshResponse): FxRefr
   if (data.refreshEnabled === false) {
     return {
       tone: 'neutral',
-      text: '汇率在线刷新已被禁用。',
+      text: '匯率在線刷新已被禁用。',
     };
   }
 
   if (data.pairCount === 0) {
     return {
       tone: 'neutral',
-      text: '当前范围无可刷新的汇率对。',
+      text: '當前範圍無可刷新的匯率對。',
     };
   }
 
   if (data.updatedCount > 0 && data.staleCount === 0 && data.errorCount === 0) {
     return {
       tone: 'success',
-      text: `汇率已刷新，共更新 ${data.updatedCount} 对。`,
+      text: `匯率已刷新，共更新 ${data.updatedCount} 對。`,
     };
   }
 
-  const summary = `更新 ${data.updatedCount} 对，仍过期 ${data.staleCount} 对，失败 ${data.errorCount} 对。`;
+  const summary = `更新 ${data.updatedCount} 對，仍過期 ${data.staleCount} 對，失敗 ${data.errorCount} 對。`;
   if (data.staleCount > 0) {
     return {
       tone: 'warning',
-      text: `已尝试刷新，但仍有部分货币对使用 stale/fallback 汇率。${summary}`,
+      text: `已嘗試刷新，但仍有部分貨幣對使用 stale/fallback 匯率。${summary}`,
     };
   }
 
   return {
     tone: 'warning',
-    text: `在线刷新未完全成功。${summary}`,
+    text: `在線刷新未完全成功。${summary}`,
   };
 }
 

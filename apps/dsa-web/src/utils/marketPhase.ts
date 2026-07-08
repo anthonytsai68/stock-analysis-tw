@@ -8,10 +8,10 @@ import { normalizeReportLanguage } from './reportLanguage';
 
 const REQUEST_PHASE_LABELS: Record<ReportLanguage, Record<AnalysisPhase, string>> = {
   zh: {
-    auto: '自动阶段',
-    premarket: '盘前',
-    intraday: '盘中',
-    postmarket: '盘后',
+    auto: '自動階段',
+    premarket: '盤前',
+    intraday: '盤中',
+    postmarket: '盤後',
   },
   en: {
     auto: 'Auto',
@@ -29,13 +29,13 @@ const REQUEST_PHASE_LABELS: Record<ReportLanguage, Record<AnalysisPhase, string>
 
 const MARKET_PHASE_LABELS: Record<ReportLanguage, Record<MarketPhaseValue, string>> = {
   zh: {
-    premarket: '盘前',
-    intraday: '盘中',
-    lunch_break: '午间休市',
-    closing_auction: '临近收盘',
-    postmarket: '盘后',
+    premarket: '盤前',
+    intraday: '盤中',
+    lunch_break: '午間休市',
+    closing_auction: '臨近收盤',
+    postmarket: '盤後',
     non_trading: '非交易日',
-    unknown: '阶段未知',
+    unknown: '階段未知',
   },
   en: {
     premarket: 'Pre-market',
@@ -59,9 +59,9 @@ const MARKET_PHASE_LABELS: Record<ReportLanguage, Record<MarketPhaseValue, strin
 
 const TEXT = {
   zh: {
-    requestPrefix: '请求阶段',
-    finalPrefix: '市场阶段',
-    partialBar: '日线未完成',
+    requestPrefix: '請求階段',
+    finalPrefix: '市場階段',
+    partialBar: '日線未完成',
   },
   en: {
     requestPrefix: 'Requested phase',

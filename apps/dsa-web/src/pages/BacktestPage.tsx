@@ -42,8 +42,8 @@ function phaseLabel(row: BacktestResultItem, language: UiLanguage): string {
   const label = getMarketPhaseSummaryLabel(row.marketPhaseSummary, language);
   if (label) {
     return label
-      .replace('市场阶段: ', '')
-      .replace('市场阶段：', '')
+      .replace('市場階段: ', '')
+      .replace('市場階段：', '')
       .replace('Market phase: ', '');
   }
   return (row.marketPhase ? BACKTEST_PHASE_LABELS[language][row.marketPhase] : undefined) || row.marketPhase || '--';

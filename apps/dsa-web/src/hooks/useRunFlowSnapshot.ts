@@ -236,7 +236,7 @@ const appendDerivedEdge = (
 
     if (!previousEvent?.nodeId) {
       return nodeById.has('task_queue')
-        ? appendEdge(edges, 'task_queue', nodeId, 'control', node.status, '调用')
+        ? appendEdge(edges, 'task_queue', nodeId, 'control', node.status, '調用')
         : edges;
     }
 
@@ -249,10 +249,10 @@ const appendDerivedEdge = (
       providerRunFromEvent(displayEvent, node),
     );
     const label = transitionKind === 'fallback'
-      ? '降级'
+      ? '降級'
       : transitionKind === 'retry'
-        ? '重试'
-        : '调用';
+        ? '重試'
+        : '調用';
     const message = metadataString(displayEvent.metadata, 'fallbackFrom', 'fallback_from', 'fallbackTo', 'fallback_to');
     return appendEdge(edges, previousNode.id, nodeId, transitionKind, node.status, label, message);
   }

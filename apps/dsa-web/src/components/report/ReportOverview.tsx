@@ -49,10 +49,10 @@ const normalizeBoardType = (value?: string): 'sector' | 'concept' | null => {
   if (!normalized) {
     return null;
   }
-  if (['行业', '行业板块', 'industry', 'sector'].includes(normalized)) {
+  if (['行業', '行業板塊', 'industry', 'sector'].includes(normalized)) {
     return 'sector';
   }
-  if (['概念', '概念板块', '题材', 'concept', 'theme'].includes(normalized)) {
+  if (['概念', '概念板塊', '題材', 'concept', 'theme'].includes(normalized)) {
     return 'concept';
   }
   return null;
@@ -159,7 +159,7 @@ const buildPreparedRelatedBoards = (
 };
 
 /**
- * 报告概览区组件 - 终端风格
+ * 報告概覽區組件 - 終端風格
  */
 export const ReportOverview: React.FC<ReportOverviewProps> = ({
   meta,
@@ -244,11 +244,11 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
 
   return (
     <div className="space-y-5">
-      {/* 主信息区 - 两列布局 */}
+      {/* 主信息區 - 兩列布局 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
-        {/* 左侧：股票信息与结论 */}
+        {/* 左側：股票信息與結論 */}
         <div className="lg:col-span-2 space-y-5">
-          {/* 股票头部 */}
+          {/* 股票頭部 */}
           <Card variant="gradient" padding="md" className="home-report-hero">
             <div className="flex items-start justify-between mb-5">
               <div className="flex-1">
@@ -256,7 +256,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
                   <h2 className="text-[28px] font-bold leading-tight text-foreground">
                     {meta.stockName || meta.stockCode}
                   </h2>
-                  {/* 价格和涨跌幅 */}
+                  {/* 價格和漲跌幅 */}
                   {meta.currentPrice != null && (
                     <div className="flex items-baseline gap-2">
                       <span className="text-xl font-bold font-mono" style={getPriceChangeStyle(meta.changePct)}>
@@ -292,7 +292,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
               </div>
             </div>
 
-            {/* 关键结论 */}
+            {/* 關鍵結論 */}
             <div className="home-divider border-t pt-5">
               <span className="label-uppercase">{text.keyInsights}</span>
               <p className="mt-2 max-w-[62ch] whitespace-pre-wrap text-left text-[15px] leading-7 text-foreground">
@@ -302,7 +302,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-            {/* 操作建议 */}
+            {/* 操作建議 */}
             <Card
               variant="bordered"
               padding="sm"
@@ -325,7 +325,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
               </div>
             </Card>
 
-            {/* 趋势预测 */}
+            {/* 趨勢預測 */}
             <Card
               variant="bordered"
               padding="sm"
@@ -365,7 +365,7 @@ export const ReportOverview: React.FC<ReportOverviewProps> = ({
           )}
         </div>
 
-        {/* 右侧：情绪指标 / 自选操作 */}
+        {/* 右側：情緒指標 / 自選操作 */}
         <div className="flex flex-col space-y-4">
           {watchlist && meta.reportType !== 'market_review' && (
             <Card variant="bordered" padding="sm" className="home-panel-card">

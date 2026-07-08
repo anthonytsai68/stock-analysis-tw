@@ -2,9 +2,9 @@ import { validateStockCode } from './validation';
 import { normalizeStockCode } from './stockCode';
 
 const EXCHANGE_PREFIXES = new Set(['SH', 'SZ', 'BJ', 'HK', 'US', 'SS']);
-const LOWERCASE_TICKER_CONTEXT_RE = /换成|改看|分析|看看|研究|诊断|比较|对比|\bvs\b|和[^，。,.!?！？]{0,40}比|差异(?!化)|区别|不同|相比|对照|比一比|哪个|哪只|哪一个|谁更|更值得|更适合|怎么选|选哪|二选一/i;
+const LOWERCASE_TICKER_CONTEXT_RE = /換成|改看|分析|看看|研究|診斷|比較|對比|\bvs\b|和[^，。,.!?！？]{0,40}比|差異(?!化)|區別|不同|相比|對照|比一比|哪個|哪隻|哪一個|誰更|更值得|更適合|怎麼選|選哪|二選一/i;
 const CONTEXTUAL_INDICATOR_TOKENS = new Set(['MA']);
-const INDICATOR_CONTEXT_RE = /指标|均线|移动平均|排列|多头|空头|金叉|死叉|支撑|压力|MA\d|SMA|EMA/i;
+const INDICATOR_CONTEXT_RE = /指標|均線|移動平均|排列|多頭|空頭|金叉|死叉|支撐|壓力|MA\d|SMA|EMA/i;
 
 // Mirrors backend _COMMON_WORDS for #1596 free-text extraction only.
 // Explicit validation via validateStockCode() intentionally keeps its original contract.
