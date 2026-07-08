@@ -20,7 +20,7 @@ export function getTodayIso(): string {
   return toDateInputValue(new Date());
 }
 
-export function formatMoney(value: number | undefined | null, currency = 'CNY'): string {
+export function formatMoney(value: number | undefined | null, currency = 'TWD'): string {
   if (value == null || Number.isNaN(value)) return '--';
   return `${currency} ${Number(value).toLocaleString('zh-CN', {
     minimumFractionDigits: 2,

@@ -148,7 +148,7 @@ function makeSnapshot(options: {
         ownerId: null,
         broker: 'Demo',
         market: 'us',
-        baseCurrency: 'CNY',
+        baseCurrency: 'TWD',
         asOf: '2026-03-19',
         costMethod: 'fifo' as const,
         totalCash: 1000,
