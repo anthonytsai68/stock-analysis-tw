@@ -1,5 +1,5 @@
 import type React from 'react';
-import { lazy, useEffect } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { ApiErrorAlert, Shell } from './components/common';
 import {
@@ -10,6 +10,7 @@ import {
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { UiLanguageProvider, useUiLanguage } from './contexts/UiLanguageContext';
 import { useAgentChatStore } from './stores/agentChatStore';
+import { userApi } from './api/user';
 import './App.css';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -25,17 +26,29 @@ const TokenUsagePage = lazy(() => import('./pages/TokenUsagePage'));
 const StockScreeningPage = lazy(() => import('./pages/StockScreeningPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const UserRegisterPage = lazy(() => import('./pages/UserRegisterPage'));
+const UserLoginPage = lazy(() => import('./pages/UserLoginPage'));
+const UserDashboardPage = lazy(() => import('./pages/UserDashboardPage'));
 
 const AppContent: React.FC = () => {
   const location = useLocation();
   const { authEnabled, loggedIn, isLoading, loadError, refreshStatus } = useAuth();
   const { t } = useUiLanguage();
+  const [userLoggedIn, setUserLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
     useAgentChatStore.getState().setCurrentRoute(location.pathname);
   }, [location.pathname]);
 
-  if (isLoading) {
+  // Check user session (re-check on location change)
+  useEffect(() => {
+    if (authEnabled && !loggedIn && !isLoading) {
+      userApi.getStatus().then(s => setUserLoggedIn(s.loggedIn)).catch(() => setUserLoggedIn(false));
+    } else if (loggedIn) {
+      setUserLoggedIn(false); // admin is logged in, no need for user check
+    }
+  }, [authEnabled, loggedIn, isLoading, location.pathname]);
+
+  if (isLoading || userLoggedIn === null) {
     return <PageLoadingFallback />;
   }
 
@@ -69,6 +82,40 @@ const AppContent: React.FC = () => {
         <StandaloneRouteBoundary>
           <UserRegisterPage />
         </StandaloneRouteBoundary>
+      );
+    }
+    if (location.pathname === '/user/login') {
+      return (
+        <StandaloneRouteBoundary>
+          <UserLoginPage />
+        </StandaloneRouteBoundary>
+      );
+    }
+    // Check user session — if valid, let them in
+    if (userLoggedIn) {
+      // User has session cookie, skip admin redirect
+      // The API middleware will handle auth for API calls
+      // Show the app without sidebar admin features
+      return (
+        <Routes>
+          <Route
+            element={(
+              <Shell>
+                <RouteOutletBoundary />
+              </Shell>
+            )}
+          >
+            <Route path="/" element={<HomePage />} />
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/portfolio" element={<PortfolioPage />} />
+            <Route path="/decision-signals" element={<DecisionSignalsPage />} />
+            <Route path="/screening" element={<StockScreeningPage />} />
+            <Route path="/backtest" element={<BacktestPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/usage" element={<TokenUsagePage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
       );
     }
     const redirect = encodeURIComponent(location.pathname + location.search);

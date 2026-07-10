@@ -52,6 +52,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     Admin endpoints require admin session.
     User endpoints accept user session OR admin session.
+    General API routes accept admin OR user session.
     """
 
     async def dispatch(
@@ -74,18 +75,21 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if admin_cookie and verify_session(admin_cookie):
             return await call_next(request)
 
-        # For user paths, also check user session
-        if _is_user_path(path):
-            user_cookie = request.cookies.get(USER_COOKIE)
-            if user_cookie and verify_user_session(user_cookie):
-                return await call_next(request)
+        # Admin-only paths: require admin session
+        if path.startswith("/api/v1/admin/") or path.startswith("/api/v1/system/"):
+            return JSONResponse(
+                status_code=401,
+                content={"error": "unauthorized", "message": "Admin login required"},
+            )
+
+        # All other API paths: accept user session too
+        user_cookie = request.cookies.get(USER_COOKIE)
+        if user_cookie and verify_user_session(user_cookie):
+            return await call_next(request)
 
         return JSONResponse(
             status_code=401,
-            content={
-                "error": "unauthorized",
-                "message": "Login required",
-            },
+            content={"error": "unauthorized", "message": "Login required"},
         )
 
 

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BarChart3, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
 import { userApi } from '../api/user';
 import { getParsedApiError } from '../api/error';
 
 export const UserRegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -35,8 +34,7 @@ export const UserRegisterPage: React.FC = () => {
       setTimeout(async () => {
         try {
           await userApi.login(email, password);
-          const redirect = searchParams.get('redirect') || '/';
-          navigate(redirect, { replace: true });
+          navigate('/user/dashboard', { replace: true });
         } catch {
           setError('註冊成功但自動登入失敗，請手動登入');
         }
