@@ -35,12 +35,12 @@ _PHASE_CONTEXT_KEYS = (
 )
 
 _ZH_POSTMARKET_RECAP_PATTERNS = (
-    "今日收盘后",
-    "收盘后复盘",
-    "盘后复盘",
-    "明日重点关注",
-    "明天重点关注",
-    "完整交易日复盘",
+    "今日收盤後",
+    "收盤後復盤",
+    "盤後復盤",
+    "明日重點關注",
+    "明天重點關注",
+    "完整交易日復盤",
 )
 
 _EN_POSTMARKET_RECAP_PATTERNS = (
@@ -55,17 +55,17 @@ _EN_POSTMARKET_RECAP_PATTERNS = (
 )
 
 _IMMEDIATE_ACTION_MARKERS_ZH = (
-    "立即买入",
-    "马上买入",
-    "立即加仓",
-    "马上加仓",
-    "立即卖出",
-    "马上卖出",
-    "立即减仓",
-    "马上减仓",
+    "立即買入",
+    "馬上買入",
+    "立即加倉",
+    "馬上加倉",
+    "立即賣出",
+    "馬上賣出",
+    "立即減倉",
+    "馬上減倉",
 )
 _IMMEDIATE_ACTION_MARKERS_EN = ("buy now", "sell now", "immediate buy", "immediate sell", "add now", "reduce now")
-_NEGATION_PREFIXES_ZH = ("暂不", "不建议", "禁止", "不要", "无需", "避免", "不能", "不可", "不宜", "勿", "不")
+_NEGATION_PREFIXES_ZH = ("暫不", "不建議", "禁止", "不要", "無需", "避免", "不能", "不可", "不宜", "勿", "不")
 _NEGATION_PREFIXES_EN = ("do not", "don't", "dont", "not", "no", "avoid", "hold off", "without")
 
 _KO_POSTMARKET_RECAP_PATTERNS = (
@@ -161,7 +161,7 @@ def apply_phase_decision_guardrails(
         reason = _reason_text(
             language,
             en="Core quote, daily-bar, or technical data is degraded; high confidence was capped.",
-            zh="核心行情、日线或技术数据受限，已限制高置信结论。",
+            zh="核心行情、日線或技術數據受限，已限制高置信結論。",
             ko="핵심 시세·일봉·기술 데이터가 제한되어 높은 신뢰도를 하향 조정했습니다.",
         )
         _append_reason(phase_decision, reason)
@@ -176,7 +176,7 @@ def apply_phase_decision_guardrails(
         reason = _reason_text(
             language,
             en="Current market phase does not support immediate intraday buy/sell action.",
-            zh="当前市场阶段不支持即时盘中买卖动作。",
+            zh="當前市場階段不支持即時盤中買賣動作。",
             ko="현재 시장 단계에서는 즉시 장중 매수/매도 동작을 지원하지 않습니다.",
         )
         _append_reason(phase_decision, reason)
@@ -189,7 +189,7 @@ def apply_phase_decision_guardrails(
         reason = _reason_text(
             language,
             en="Intraday output contained post-market recap wording; replaced with phase-safe action wording.",
-            zh="盘中输出包含盘后复盘口吻，已替换为阶段安全动作表述。",
+            zh="盤中輸出包含盤後復盤口吻，已替換為階段安全動作表述。",
             ko="장중 출력에 장 마감 후 리뷰 표현이 있어 단계에 맞는 안전한 표현으로 교체했습니다.",
         )
         _replace_postmarket_recap_fields(result, phase_decision, language=language)
@@ -261,7 +261,7 @@ def _phase_warning_limitations(summary: Optional[Mapping[str, Any]], *, language
         return [f"market phase warning: {item}" for item in warnings]
     if language == "ko":
         return [f"시장 단계 경고: {item}" for item in warnings]
-    return [f"市场阶段提醒：{item}" for item in warnings]
+    return [f"市場階段提醒：{item}" for item in warnings]
 
 
 def _merge_limitations(*groups: Any, limit: int = 5) -> List[str]:
@@ -357,7 +357,7 @@ def _replace_postmarket_recap_fields(
             "This is an intraday phase; use live state, watch conditions, and the next "
             "check point rather than post-market recap wording."
         ),
-        zh="当前处于盘中阶段，应以实时状态、观察条件和下一次检查点为准，避免盘后复盘口径。",
+        zh="當前處於盤中階段，應以實時狀態、觀察條件和下一次檢查點為準，避免盤後復盤口徑。",
         ko="현재 장중 단계이므로 장 마감 후 리뷰 표현 대신 실시간 상태·관찰 조건·다음 점검 시점을 기준으로 합니다.",
     )
     if _contains_any(core.get("one_sentence"), _patterns(language)):
@@ -384,28 +384,28 @@ def _adjustment_limitation_text(adjustment: str, *, language: str) -> str:
         return _reason_text(
             language,
             en="post-market recap wording adjusted",
-            zh="已修正盘后复盘口吻",
+            zh="已修正盤後復盤口吻",
             ko="장 마감 후 리뷰 표현을 수정함",
         )
     if adjustment == "non_intraday_action_adjusted":
         return _reason_text(
             language,
             en="non-intraday immediate action adjusted",
-            zh="非盘中阶段已修正即时买卖动作",
+            zh="非盤中階段已修正即時買賣動作",
             ko="비장중 단계의 즉시 매매 동작을 수정함",
         )
     if adjustment == "confidence_capped_non_intraday_action":
         return _reason_text(
             language,
             en="confidence capped for non-intraday action",
-            zh="非盘中阶段已限制买卖置信度",
+            zh="非盤中階段已限制買賣置信度",
             ko="비장중 단계 매매에 대해 신뢰도를 제한함",
         )
     if adjustment == "confidence_capped_core_data_degraded":
         return _reason_text(
             language,
             en="confidence capped due to degraded core data",
-            zh="核心数据受限已降低置信度",
+            zh="核心數據受限已降低置信度",
             ko="핵심 데이터 제한으로 신뢰도를 낮춤",
         )
     return adjustment
@@ -415,7 +415,7 @@ def _safe_wait_action(language: str) -> str:
     return _reason_text(
         language,
         en="Wait for intraday confirmation; do not chase.",
-        zh="等待盘中确认，禁止追高。",
+        zh="等待盤中確認，禁止追高。",
         ko="장중 확인을 기다리고 추격 매수하지 마세요.",
     )
 

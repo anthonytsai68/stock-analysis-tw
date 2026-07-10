@@ -68,10 +68,10 @@ const stripTopHeading = (markdown: string, title?: string): string => {
   const reportTitle = normalizeHeading(title || '');
   const genericTitles = new Set([
     'market review',
-    '大盤覆盤',
-    '大盤覆盤詳情',
-    'a股市場覆盤',
-    'a 股市場覆盤',
+    '大盤復盤',
+    '大盤復盤詳情',
+    'a股市場復盤',
+    'a 股市場復盤',
   ]);
 
   if (heading === reportTitle || genericTitles.has(heading)) {
@@ -106,7 +106,7 @@ const splitMarketReviewSections = (markdown: string): MarketReviewSection[] => {
   if (matches.length === 0) {
     return [{
       id: 'full-review',
-      title: '覆盤正文',
+      title: '復盤正文',
       content: markdown,
       icon: FileText,
     }];
@@ -116,7 +116,7 @@ const splitMarketReviewSections = (markdown: string): MarketReviewSection[] => {
   const sections: MarketReviewSection[] = intro
     ? [{
         id: 'overview',
-        title: '覆盤概覽',
+        title: '復盤概覽',
         content: intro,
         icon: FileText,
       }]
@@ -280,7 +280,7 @@ const MARKET_REVIEW_TEXT: Record<ReportLanguage, {
   lagging: string;
 }> = {
   zh: {
-    reviewSummary: '覆盤摘要',
+    reviewSummary: '復盤摘要',
     noReviewSummary: '暫無摘要',
     noSentimentScore: '暫無評分',
     rotationAndFunds: '輪動與資金',

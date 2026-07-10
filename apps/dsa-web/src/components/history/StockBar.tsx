@@ -19,7 +19,7 @@ interface StockBarProps {
 
 /**
  * 個股欄組件：以股票維度展示歷史分析記錄，每隻股票只顯示一條。
- * 大盤覆盤可作為 MARKET 項參與展示，並按最近分析時間排序。
+ * 大盤復盤可作為 MARKET 項參與展示，並按最近分析時間排序。
  */
 export const StockBar: React.FC<StockBarProps> = ({
   items,

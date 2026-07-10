@@ -71,11 +71,11 @@ _MARKET_ROLES = {
         "en": "Japan stock",
     },
     "kr": {
-        "zh": "韩股",
+        "zh": "韓股",
         "en": "Korea stock",
     },
     "tw": {
-        "zh": "台股",
+        "zh": "臺股",
         "en": "Taiwan stock",
     },
 }
@@ -83,8 +83,8 @@ _MARKET_ROLES = {
 _MARKET_GUIDELINES = {
     "cn": {
         "zh": (
-            "- 本次分析对象为 **A 股**（中国沪深交易所上市股票）。\n"
-            "- 请关注 A 股特有的涨跌停机制（±10%/±20%/±30%）、T+1 交易制度及相关政策因素。"
+            "- 本次分析對象為 **A 股**（中國滬深交易所上市股票）。\n"
+            "- 請關注 A 股特有的漲跌停機制（±10%/±20%/±30%）、T+1 交易制度及相關政策因素。"
         ),
         "en": (
             "- This analysis covers a **China A-share** (listed on Shanghai/Shenzhen exchanges).\n"
@@ -93,8 +93,8 @@ _MARKET_GUIDELINES = {
     },
     "hk": {
         "zh": (
-            "- 本次分析对象为 **港股**（香港交易所上市股票）。\n"
-            "- 港股无涨跌停限制，支持 T+0 交易，需关注港币汇率、南北向资金流及联交所特有规则。"
+            "- 本次分析對象為 **港股**（香港交易所上市股票）。\n"
+            "- 港股無漲跌停限制，支持 T+0 交易，需關注港幣匯率、南北向資金流及聯交所特有規則。"
         ),
         "en": (
             "- This analysis covers a **Hong Kong stock** (listed on HKEX).\n"
@@ -103,8 +103,8 @@ _MARKET_GUIDELINES = {
     },
     "us": {
         "zh": (
-            "- 本次分析对象为 **美股**（美国交易所上市股票）。\n"
-            "- 美股无涨跌停限制（但有熔断机制），支持 T+0 交易和盘前盘后交易，需关注美元汇率、美联储政策及 SEC 监管动态。"
+            "- 本次分析對象為 **美股**（美國交易所上市股票）。\n"
+            "- 美股無漲跌停限制（但有熔斷機制），支持 T+0 交易和盤前盤後交易，需關注美元匯率、美聯儲政策及 SEC 監管動態。"
         ),
         "en": (
             "- This analysis covers a **US stock** (listed on NYSE/NASDAQ).\n"
@@ -113,8 +113,8 @@ _MARKET_GUIDELINES = {
     },
     "jp": {
         "zh": (
-            "- 本次分析对象为 **日股**（日本交易所上市股票，Yahoo Finance suffix 如 `.T`）。\n"
-            "- 请按日本市场语境分析，关注日元汇率、日本央行政策、公司治理与行业周期；不要套用 A 股涨跌停、北向资金、龙虎榜、融资融券等 A 股专属概念。"
+            "- 本次分析對象為 **日股**（日本交易所上市股票，Yahoo Finance suffix 如 `.T`）。\n"
+            "- 請按日本市場語境分析，關注日元匯率、日本央行政策、公司治理與行業週期；不要套用 A 股漲跌停、北向資金、龍虎榜、融資融券等 A 股專屬概念。"
         ),
         "en": (
             "- This analysis covers a **Japan stock** (Yahoo Finance suffix such as `.T`).\n"
@@ -123,8 +123,8 @@ _MARKET_GUIDELINES = {
     },
     "kr": {
         "zh": (
-            "- 本次分析对象为 **韩股**（韩国交易所/KOSDAQ 上市股票，必须带 `.KS` / `.KQ` 后缀）。\n"
-            "- 请按韩国市场语境分析，关注韩元汇率、韩国央行政策、半导体/互联网产业周期与韩国交易制度；不要套用 A 股涨跌停、北向资金、龙虎榜、融资融券等 A 股专属概念。"
+            "- 本次分析對象為 **韓股**（韓國交易所/KOSDAQ 上市股票，必須帶 `.KS` / `.KQ` 後綴）。\n"
+            "- 請按韓國市場語境分析，關注韓元匯率、韓國央行政策、半導體/互聯網產業週期與韓國交易制度；不要套用 A 股漲跌停、北向資金、龍虎榜、融資融券等 A 股專屬概念。"
         ),
         "en": (
             "- This analysis covers a **Korea stock** (KOSPI/KOSDAQ suffix `.KS` / `.KQ`).\n"
@@ -133,10 +133,10 @@ _MARKET_GUIDELINES = {
     },
     "tw": {
         "zh": (
-            "- 本次分析对象为 **台股**（台湾证券交易所上市 `.TW`，或台湾柜买中心上柜 `.TWO`）。\n"
-            "- 请按台湾市场语境分析，关注新台币（TWD）汇率、台湾央行政策、半导体/电子代工产业链、"
-            "三大法人（外资／投信／自营商）买卖超、融资融券与当冲，以及 TWSE/TPEx ±10% 涨跌停制度；"
-            "不要套用 A 股专属的北向资金、龙虎榜等概念（台股的法人结构与资金流口径与 A 股不同）。"
+            "- 本次分析對象為 **臺股**（臺灣證券交易所上市 `.TW`，或臺灣櫃買中心上櫃 `.TWO`）。\n"
+            "- 請按臺灣市場語境分析，關注新臺幣（TWD）匯率、臺灣央行政策、半導體/電子代工產業鏈、"
+            "三大法人（外資／投信／自營商）買賣超、融資融券與當衝，以及 TWSE/TPEx ±10% 漲跌停製度；"
+            "不要套用 A 股專屬的北向資金、龍虎榜等概念（臺股的法人結構與資金流口徑與 A 股不同）。"
         ),
         "en": (
             "- This analysis covers a **Taiwan stock** (TWSE-listed `.TW`, or TPEx/OTC `.TWO`).\n"
@@ -157,7 +157,7 @@ def get_market_role(stock_code: Optional[str], lang: str = "zh") -> str:
         lang: 'zh' or 'en'.
 
     Returns:
-        Role string like 'A 股投资分析' or 'US stock investment analysis'.
+        Role string like 'A 股投資分析' or 'US stock investment analysis'.
     """
     market = detect_market(stock_code)
     lang_key = "en" if lang in ("en", "ko") else "zh"

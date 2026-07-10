@@ -22,24 +22,24 @@ class DecisionScaleBand:
 
 
 CANONICAL_DECISION_SCALE: tuple[DecisionScaleBand, ...] = (
-    DecisionScaleBand(80, 100, "strong_buy", "buy", "buy", "强烈买入", "高胜率机会，可执行买入/加仓计划"),
-    DecisionScaleBand(60, 79, "buy", "buy", "buy", "买入", "偏积极机会，允许少量待确认项"),
-    DecisionScaleBand(40, 59, "watch", "watch", "hold", "观望", "信号分歧或确认不足，等待触发条件"),
-    DecisionScaleBand(20, 39, "reduce", "reduce", "sell", "减仓", "风险明显抬升，优先降低暴露"),
-    DecisionScaleBand(0, 19, "sell", "sell", "sell", "卖出", "趋势或风险显著恶化，优先退出"),
+    DecisionScaleBand(80, 100, "strong_buy", "buy", "buy", "強烈買入", "高勝率機會，可執行買入/加倉計劃"),
+    DecisionScaleBand(60, 79, "buy", "buy", "buy", "買入", "偏積極機會，允許少量待確認項"),
+    DecisionScaleBand(40, 59, "watch", "watch", "hold", "觀望", "信號分歧或確認不足，等待觸發條件"),
+    DecisionScaleBand(20, 39, "reduce", "reduce", "sell", "減倉", "風險明顯抬升，優先降低暴露"),
+    DecisionScaleBand(0, 19, "sell", "sell", "sell", "賣出", "趨勢或風險顯著惡化，優先退出"),
 )
 
 
-CANONICAL_DECISION_SCALE_PROMPT_ZH = """## Canonical 评分与动作口径
+CANONICAL_DECISION_SCALE_PROMPT_ZH = """## Canonical 評分與動作口徑
 
-- `sentiment_score`、`operation_advice`、三态 `decision_type` 与八态 `action` 必须按同一口径表达。
-- 80-100：强烈买入，`action=buy`，`decision_type=buy`。
-- 60-79：买入，`action=buy`，`decision_type=buy`。
-- 40-59：观望，`action=watch`，`decision_type=hold`。
-- 20-39：减仓，`action=reduce`，`decision_type=sell`。
-- 0-19：卖出，`action=sell`，`decision_type=sell`。
-- `decision_type` 只保留 `buy|hold|sell` 兼容统计；更细建议必须写入 `action`。
-- 若 score >= 60 但最终 `action` 是 `hold/watch`，或 score < 40 但最终 `action` 是 `hold/watch`，必须在 `guardrail_reason` 或 `dashboard.decision_stability.reason` 中说明降级原因。"""
+- `sentiment_score`、`operation_advice`、三態 `decision_type` 與八態 `action` 必須按同一口徑表達。
+- 80-100：強烈買入，`action=buy`，`decision_type=buy`。
+- 60-79：買入，`action=buy`，`decision_type=buy`。
+- 40-59：觀望，`action=watch`，`decision_type=hold`。
+- 20-39：減倉，`action=reduce`，`decision_type=sell`。
+- 0-19：賣出，`action=sell`，`decision_type=sell`。
+- `decision_type` 只保留 `buy|hold|sell` 兼容統計；更細建議必須寫入 `action`。
+- 若 score >= 60 但最終 `action` 是 `hold/watch`，或 score < 40 但最終 `action` 是 `hold/watch`，必須在 `guardrail_reason` 或 `dashboard.decision_stability.reason` 中說明降級原因。"""
 
 
 def normalize_score(value: Any) -> Optional[int]:

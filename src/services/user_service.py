@@ -170,9 +170,10 @@ def create_user_session(user_id: int, email: str) -> str:
     secret = _get_user_session_secret()
     nonce = secrets.token_urlsafe(32)
     ts = str(int(time.time()))
-    payload = f"{user_id}.{email}.{nonce}.{ts}"
+    # Use | as delimiter — safe because email/base64url never contain |
+    payload = f"{user_id}|{email}|{nonce}|{ts}"
     sig = hmac.new(secret, payload.encode("utf-8"), hashlib.sha256).hexdigest()
-    return f"{payload}.{sig}"
+    return f"{payload}|{sig}"
 
 
 def verify_user_session(token: str) -> Optional[dict]:
@@ -180,11 +181,11 @@ def verify_user_session(token: str) -> Optional[dict]:
     secret = _get_user_session_secret()
     if not secret or not token:
         return None
-    parts = token.split(".")
+    parts = token.split("|")
     if len(parts) != 5:
         return None
     user_id_str, email, nonce, ts_str, sig = parts
-    payload = f"{user_id_str}.{email}.{nonce}.{ts_str}"
+    payload = f"{user_id_str}|{email}|{nonce}|{ts_str}"
     expected = hmac.new(secret, payload.encode("utf-8"), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(sig, expected):
         return None

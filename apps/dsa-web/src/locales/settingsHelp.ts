@@ -35,13 +35,13 @@ const settingsHelpZhCN: SettingsHelpMap = {
   'settings.ai_model.GENERATION_BACKEND': {
     title: '分析生成方式',
     showFieldKey: false,
-    summary: '決定系統用哪種方式生成個股分析、大盤覆盤和普通文本回復。',
+    summary: '決定系統用哪種方式生成個股分析、大盤復盤和普通文本回復。',
     usage: '通常保持“默認模型配置”。只有在本機已安裝並登錄對應 CLI，且你信任它處理分析內容時，才選擇本地 CLI 生成方式（實驗）。',
     valueNotes: [
       '本地 CLI 生成方式是本機啟動的命令行程序，不等於離線模型；背後的服務可能處理股票代碼、新聞、持倉上下文、分析請求和報告草稿。',
       'Docker、雲服務器、CI 不天然擁有你本機的登錄狀態；DSA 不讀取 Codex/Claude/OpenCode 登錄憑據文件，但對應 CLI 自己可能使用它的登錄狀態。',
     ],
-    impact: ['影響普通分析、大盤覆盤和文本生成入口，不改變問股助手的工具執行規則。'],
+    impact: ['影響普通分析、大盤復盤和文本生成入口，不改變問股助手的工具執行規則。'],
     notes: [
       '想恢復默認行為，選擇“默認模型配置”並保存配置。',
       '本地 CLI 生成方式當前仍是實驗能力；如果輸出不穩定或經常失敗，請設回默認模型配置。',
@@ -73,7 +73,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
       '模型是否可用、如何認證由你本機的 OpenCode 配置負責。',
       '配置時該值會作為單個 argv 參數傳給 OpenCode，不能包含空白或 shell 元字符。',
     ],
-    impact: ['影響普通分析、大盤覆盤和文本生成的 OpenCode CLI 調用，不影響問股助手。'],
+    impact: ['影響普通分析、大盤復盤和文本生成的 OpenCode CLI 調用，不影響問股助手。'],
     examples: ['OPENCODE_CLI_MODEL=provider/model'],
   },
   'settings.ai_model.GENERATION_BACKEND_TIMEOUT_SECONDS': {
@@ -110,7 +110,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
       'Agent 可通過 AGENT_LITELLM_MODEL 單獨指定模型；留空時繼承主模型。',
     ],
     impact: [
-      '影響普通個股分析、大盤覆盤、報告生成，以及未單獨覆蓋模型的 Agent 調用。',
+      '影響普通個股分析、大盤復盤、報告生成，以及未單獨覆蓋模型的 Agent 調用。',
     ],
     notes: [
       '無 provider 前綴時，LiteLLM 可能無法判斷應該使用哪組 API Key。',
@@ -278,10 +278,10 @@ const settingsHelpZhCN: SettingsHelpMap = {
   },
   'settings.data_source.TICKFLOW_API_KEY': {
     title: 'TickFlow API Key',
-    summary: '用於啟用 TickFlow A 股日 K、實時行情、股票列表/名稱與大盤覆盤增強數據。',
+    summary: '用於啟用 TickFlow A 股日 K、實時行情、股票列表/名稱與大盤復盤增強數據。',
     usage: '在 TickFlow 獲取 API Key 後填入；未配置時系統會繼續使用其他可用數據源和降級路徑。',
     valueNotes: ['該 Key 是可選增強項，不是運行主分析流程的必填項。', '不同 TickFlow 套餐的批量日 K、實時行情、除權因子和深度權限可能不同。'],
-    impact: ['影響 A 股日線回退鏈、實時行情、股票名稱/列表與大盤覆盤數據覆蓋度。'],
+    impact: ['影響 A 股日線回退鏈、實時行情、股票名稱/列表與大盤復盤數據覆蓋度。'],
     notes: ['不要在 issue、日誌或截圖中暴露真實 Key。'],
   },
   'settings.data_source.TICKFLOW_PRIORITY': {
@@ -546,7 +546,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
       'EMAIL_PASSWORD 通常是郵箱授權碼，不是網頁登錄密碼。',
       '可用 STOCK_GROUP_N / EMAIL_GROUP_N 配置分組收件人。',
     ],
-    impact: ['影響郵件報告發送、分組收件和大盤覆盤郵件送達。'],
+    impact: ['影響郵件報告發送、分組收件和大盤復盤郵件送達。'],
     notes: ['不同郵箱服務商需要先開啟 SMTP 服務。'],
   },
   'settings.notification.chat_bots': {
@@ -690,7 +690,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
     summary: '控制非交易日是否跳過分析。',
     usage: '默認 true；需要強制運行可設為 false 或使用 --force-run。',
     valueNotes: ['會結合市場日曆判斷 A 股、港股、美股等市場是否開市。'],
-    impact: ['影響定時任務、CLI 和 GitHub Actions 手動運行是否在休市日執行；Web/API 大盤覆盤按鈕會直接提交任務。'],
+    impact: ['影響定時任務、CLI 和 GitHub Actions 手動運行是否在休市日執行；Web/API 大盤復盤按鈕會直接提交任務。'],
     notes: ['關閉後休市日可能生成缺少實時行情的報告。'],
   },
   'settings.system.HTTP_PROXY': {
@@ -762,7 +762,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
     summary: '普通分析流程默認使用的運行時模型。',
     usage: '從已啟用渠道的模型列表中選擇；自動模式使用第一個可用模型。',
     valueNotes: ['保存後寫入 LITELLM_MODEL。'],
-    impact: ['影響個股分析、大盤覆盤和默認報告生成。'],
+    impact: ['影響個股分析、大盤復盤和默認報告生成。'],
     notes: ['如果模型不在已啟用渠道列表中，保存時可能被清理或要求重新選擇。'],
   },
   'settings.llm_channel.agent_primary_model': {
@@ -816,7 +816,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
     impact: ['影響問股助手的回覆生成和工具調用入口，不改變它能使用哪些工具。'],
     notes: [
       '想恢復默認行為，選擇“自動”並保存配置。',
-      '這項設置隻影響問股助手，不會改變普通個股分析和大盤覆盤的生成方式。',
+      '這項設置隻影響問股助手，不會改變普通個股分析和大盤復盤的生成方式。',
     ],
     examples: [],
   },
@@ -1068,11 +1068,11 @@ const settingsHelpZhCN: SettingsHelpMap = {
   },
   'settings.report.MERGE_EMAIL_NOTIFICATION': {
     title: '合併郵件通知',
-    summary: '將個股分析與大盤覆盤合併為一封郵件發送。',
-    usage: '開啟後，個股分析和大盤覆盤會合並在同一封郵件中發送。',
-    valueNotes: ['僅在同時啟用了個股分析和大盤覆盤時有效。'],
+    summary: '將個股分析與大盤復盤合併為一封郵件發送。',
+    usage: '開啟後，個股分析和大盤復盤會合並在同一封郵件中發送。',
+    valueNotes: ['僅在同時啟用了個股分析和大盤復盤時有效。'],
     impact: ['影響郵件通知的封數和內容組織。'],
-    notes: ['關閉後個股分析和大盤覆盤會分別發送郵件。'],
+    notes: ['關閉後個股分析和大盤復盤會分別發送郵件。'],
   },
   // ------------------------------------------------------------------
   // Notification routing
@@ -1188,7 +1188,7 @@ const settingsHelpZhCN: SettingsHelpMap = {
     valueNotes: [
       'cn 覆蓋 A 股，hk 覆蓋港股，us 覆蓋美股，jp 覆蓋日股，kr 覆蓋韓股，both 覆蓋全部（cn,hk,us,jp,kr）。',
       'MARKET_REVIEW_REGION 直接寫入文本框，支持逗號分隔的子集；空值或非法值會回退到 cn。',
-      '默認開啟 DAILY_MARKET_CONTEXT_ENABLED；設為 false 後仍可生成大盤覆盤報告，但個股分析不會讀取大盤摘要或軟化買入/加倉建議。',
+      '默認開啟 DAILY_MARKET_CONTEXT_ENABLED；設為 false 後仍可生成大盤復盤報告，但個股分析不會讀取大盤摘要或軟化買入/加倉建議。',
       '配色方案影響大盤報告中指數漲跌的顏色顯示：green_up 為綠漲紅跌，red_up 為紅漲綠跌。',
     ],
     impact: ['影響分析報告中大盤概覽部分的內容和視覺呈現。'],

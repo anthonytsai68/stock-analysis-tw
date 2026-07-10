@@ -14,20 +14,20 @@ from src.report_language import (
 
 
 _CONSERVATIVE_TAGS = {"high_risk", "market_cooling", "conservative", "low_position_cap"}
-_CONSERVATIVE_TEXT_MARKERS_ZH = ("退潮", "观望", "高风险", "谨慎", "保守", "仓位上限", "仓位不超过", "轻仓")
+_CONSERVATIVE_TEXT_MARKERS_ZH = ("退潮", "觀望", "高風險", "謹慎", "保守", "倉位上限", "倉位不超過", "輕倉")
 _CONSERVATIVE_TEXT_MARKERS_EN = ("high risk", "risk-off", "risk off", "watch", "cautious", "conservative", "position cap", "position limit")
 _CONSERVATIVE_TEXT_MARKERS_KO = ("고위험", "관망", "위험", "신중", "보수", "비중 상한", "비중 축소", "경량")
 _AGGRESSIVE_BUY_MARKERS_ZH = (
-    "立即买入",
-    "马上买入",
-    "建议买入",
-    "分批买入",
+    "立即買入",
+    "馬上買入",
+    "建議買入",
+    "分批買入",
     "分批低吸",
-    "回踩买入",
-    "积极买入",
-    "激进买入",
+    "回踩買入",
+    "積極買入",
+    "激進買入",
     "追高",
-    "加仓",
+    "加倉",
 )
 _AGGRESSIVE_BUY_MARKERS_EN = ("buy now", "strong buy", "aggressive buy", "chase", "add aggressively")
 _AGGRESSIVE_BUY_MARKERS_KO = (
@@ -40,7 +40,7 @@ _AGGRESSIVE_BUY_MARKERS_KO = (
     "추격 매수",
     "비중 확대",
 )
-_NEGATION_HINTS_ZH = ("暂不", "不建议", "不应", "不宜", "不能", "无法", "不允许", "禁止", "避免", "不要", "别", "先不")
+_NEGATION_HINTS_ZH = ("暫不", "不建議", "不應", "不宜", "不能", "無法", "不允許", "禁止", "避免", "不要", "別", "先不")
 _NEGATION_HINTS_EN = (" not ", "do not", "don't", "no ", "never", "avoid")
 _NEGATION_HINTS_KO = ("권하지 않", "하지 않", "하지 마", "불가", "금지", "피하", "보류", "않", "말")
 _NEGATION_LOOKBACK = 16
@@ -48,7 +48,7 @@ _GUARDRAIL_SENTIMENT_SCORE = 52
 
 
 def _softened_operation_advice(language: str) -> str:
-    return localize_operation_advice("观望", language)
+    return localize_operation_advice("觀望", language)
 
 
 def _negation_hints_for(language: str) -> tuple[str, ...]:
@@ -146,8 +146,8 @@ def _softened_position_advice(language: str) -> dict[str, str]:
             "has_position": "소량만 보유하고 비중을 늘리지 마세요. 리스크 관리선이 무너지면 비중을 줄이세요.",
         }
     return {
-        "no_position": "大盘环境偏谨慎，暂不开新仓，等待风险缓解或确认信号。",
-        "has_position": "仅保留小仓观察，暂不扩大仓位；若跌破风控位优先降低仓位。",
+        "no_position": "大盤環境偏謹慎，暫不開新倉，等待風險緩解或確認信號。",
+        "has_position": "僅保留小倉觀察，暫不擴大倉位；若跌破風控位優先降低倉位。",
     }
 
 
@@ -166,9 +166,9 @@ def _softened_position_strategy(language: str) -> dict[str, str]:
             "risk_control": "시장 위험이 완화되기 전까지 비중을 늘리지 말고 낙폭을 엄격히 관리하세요.",
         }
     return {
-        "suggested_position": "小仓/低仓位",
+        "suggested_position": "小倉/低倉位",
         "entry_plan": position_advice["no_position"],
-        "risk_control": "大盘风险未缓解前不扩大仓位，严格控制回撤。",
+        "risk_control": "大盤風險未緩解前不擴大倉位，嚴格控制回撤。",
     }
 
 
@@ -181,7 +181,7 @@ def _append_softening_limitation(phase_decision: dict[str, Any], *, language: st
     elif language == "ko":
         limitation = "대시장 환경이 보수적/고위험이라 공격적 매수 권고를 완화했습니다."
     else:
-        limitation = "大盘环境偏谨慎/高风险，已软化激进买入建议。"
+        limitation = "大盤環境偏謹慎/高風險，已軟化激進買入建議。"
     if limitation not in limitations:
         limitations.append(limitation)
     phase_decision["data_limitations"] = limitations
@@ -191,7 +191,7 @@ def _append_softening_limitation(phase_decision: dict[str, Any], *, language: st
     elif language == "ko":
         reason_note = "시장 환경상 보수적인 비중 관리가 필요합니다."
     else:
-        reason_note = "大盘环境要求降低进攻性并控制仓位。"
+        reason_note = "大盤環境要求降低進攻性並控制倉位。"
     separator = "; " if language == "en" else "；"
     phase_decision["confidence_reason"] = (
         f"{reason}{separator}{reason_note}" if reason else reason_note

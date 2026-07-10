@@ -7,7 +7,7 @@ const NotFoundPage: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = '頁面未找到 - DSA';
+    document.title = '頁面未找到 - StockGPT';
   }, []);
 
   return (

@@ -227,7 +227,7 @@ const ChatPage: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = '問股 - DSA';
+    document.title = '問股 - StockGPT';
   }, []);
 
   useEffect(() => () => {

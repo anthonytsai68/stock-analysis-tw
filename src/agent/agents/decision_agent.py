@@ -53,7 +53,7 @@ Requirements:
                 return prompt + "\nAlways answer in English.\n"
             if report_language == "ko":
                 return prompt + "\n항상 한국어로 답변하세요.\n"
-            return prompt + "\n默认使用中文回答。\n"
+            return prompt + "\n默認使用中文回答。\n"
 
         skills = ""
         if self.skill_instructions:
@@ -150,10 +150,10 @@ should sum to 100; all-zero means no effective signal and must not be faked.
 """
         return prompt + """
 
-## 输出语言
-- 所有 JSON 键名保持不变。
-- `decision_type` 必须保持为 `buy|hold|sell`。
-- 所有面向用户的人类可读文本值必须使用中文。
+## 輸出語言
+- 所有 JSON 鍵名保持不變。
+- `decision_type` 必須保持為 `buy|hold|sell`。
+- 所有面向用戶的人類可讀文本值必須使用中文。
 """
 
     def build_user_message(self, ctx: AgentContext) -> str:
