@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, BarChart3, Bell, BriefcaseBusiness, Gauge, Home, LogOut, MessageSquareQuote, Search, Settings2 } from 'lucide-react';
+import { Activity, BarChart3, Bell, BriefcaseBusiness, Gauge, Home, LogOut, MessageSquareQuote, Search, Settings2, Shield } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { ALPHASIFT_CONFIG_CHANGED_EVENT, SYSTEM_CONFIG_CHANGED_EVENT, alphasiftApi } from '../../api/alphasift';
 import { useAuth } from '../../contexts/AuthContext';
@@ -37,6 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'alerts', labelKey: 'layout.nav.alerts', to: '/alerts', icon: Bell },
   { key: 'usage', labelKey: 'layout.nav.usage', to: '/usage', icon: Gauge },
   { key: 'settings', labelKey: 'layout.nav.settings', to: '/settings', icon: Settings2 },
+  { key: 'admin-users', labelKey: 'layout.nav.adminUsers', to: '/admin/users', icon: Shield },
 ];
 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ collapsed = false, onNavigate, variant = 'default' }) => {
@@ -109,7 +110,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ collapsed = false, onNav
           <BarChart3 className={cn(isRail ? 'h-[19px] w-[19px]' : 'h-5 w-5')} />
         </div>
         {!collapsed ? (
-          <p className={cn('min-w-0 truncate font-semibold text-foreground', isRail ? 'text-[0.95rem] leading-none' : 'text-sm')}>DSA</p>
+          <p className={cn('min-w-0 truncate font-semibold text-foreground', isRail ? 'text-[0.95rem] leading-none' : 'text-sm')}>StockGPT</p>
         ) : null}
       </div>
 

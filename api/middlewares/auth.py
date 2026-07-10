@@ -13,12 +13,17 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.auth import COOKIE_NAME, is_auth_enabled, verify_session
+from src.services.user_service import USER_COOKIE_NAME as USER_COOKIE, verify_user_session
 
 logger = logging.getLogger(__name__)
 
 EXEMPT_PATHS = frozenset({
     "/api/v1/auth/login",
     "/api/v1/auth/status",
+    "/api/v1/user/register",
+    "/api/v1/user/login",
+    "/api/v1/user/status",
+    "/api/v1/user/logout",
     "/api/health",
     "/api/v1/health",
     "/health",
@@ -27,6 +32,9 @@ EXEMPT_PATHS = frozenset({
     "/openapi.json",
 })
 
+# User endpoints: require user OR admin session
+USER_PATHS_PREFIXES = ("/api/v1/user/",)
+
 
 def _path_exempt(path: str) -> bool:
     """Check if path is exempt from auth."""
@@ -34,8 +42,17 @@ def _path_exempt(path: str) -> bool:
     return normalized in EXEMPT_PATHS
 
 
+def _is_user_path(path: str) -> bool:
+    """Check if path is a user endpoint."""
+    return any(path.startswith(prefix) for prefix in USER_PATHS_PREFIXES)
+
+
 class AuthMiddleware(BaseHTTPMiddleware):
-    """Require valid session for /api/v1/* when auth is enabled."""
+    """Require valid session for /api/v1/* when auth is enabled.
+
+    Admin endpoints require admin session.
+    User endpoints accept user session OR admin session.
+    """
 
     async def dispatch(
         self,
@@ -52,17 +69,24 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if not path.startswith("/api/v1/"):
             return await call_next(request)
 
-        cookie_val = request.cookies.get(COOKIE_NAME)
-        if not cookie_val or not verify_session(cookie_val):
-            return JSONResponse(
-                status_code=401,
-                content={
-                    "error": "unauthorized",
-                    "message": "Login required",
-                },
-            )
+        # Check admin session first (admin can access everything)
+        admin_cookie = request.cookies.get(COOKIE_NAME)
+        if admin_cookie and verify_session(admin_cookie):
+            return await call_next(request)
 
-        return await call_next(request)
+        # For user paths, also check user session
+        if _is_user_path(path):
+            user_cookie = request.cookies.get(USER_COOKIE)
+            if user_cookie and verify_user_session(user_cookie):
+                return await call_next(request)
+
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "unauthorized",
+                "message": "Login required",
+            },
+        )
 
 
 def add_auth_middleware(app):

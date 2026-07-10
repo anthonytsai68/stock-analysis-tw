@@ -23,6 +23,8 @@ const DecisionSignalsPage = lazy(() => import('./pages/DecisionSignalsPage'));
 const AlertsPage = lazy(() => import('./pages/AlertsPage'));
 const TokenUsagePage = lazy(() => import('./pages/TokenUsagePage'));
 const StockScreeningPage = lazy(() => import('./pages/StockScreeningPage'));
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const UserRegisterPage = lazy(() => import('./pages/UserRegisterPage'));
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -62,6 +64,13 @@ const AppContent: React.FC = () => {
         </StandaloneRouteBoundary>
       );
     }
+    if (location.pathname === '/user/register') {
+      return (
+        <StandaloneRouteBoundary>
+          <UserRegisterPage />
+        </StandaloneRouteBoundary>
+      );
+    }
     const redirect = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?redirect=${redirect}`} replace />;
   }
@@ -88,6 +97,7 @@ const AppContent: React.FC = () => {
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/usage" element={<TokenUsagePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
