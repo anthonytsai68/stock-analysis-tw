@@ -16,7 +16,8 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       const path = window.location.pathname + window.location.search;
-      if (!path.startsWith('/login')) {
+      // Only redirect if we're not already on a login/user page
+      if (!path.startsWith('/login') && !path.startsWith('/user/') && path !== '/') {
         const redirect = encodeURIComponent(path);
         window.location.assign(`/login?redirect=${redirect}`);
       }

@@ -1,97 +1,159 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { BarChart3, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { motion, useMotionValue, useTransform, useSpring } from "motion/react";
+import { Lock, Loader2, Cpu, TrendingUp, Network, Mail, ArrowRight, UserPlus } from "lucide-react";
+import { Button, Input, ParticleBackground } from '../components/common';
+import { UiLanguageToggle } from '../components/i18n/UiLanguageToggle';
 import { userApi } from '../api/user';
 import { getParsedApiError } from '../api/error';
+import { SettingsAlert } from '../components/settings';
 
-export const UserLoginPage: React.FC = () => {
-  const navigate = useNavigate();
+const UserLoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<'login' | 'register'>('login');
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 30, stiffness: 200 });
+  const smoothY = useSpring(mouseY, { damping: 30, stiffness: 200 });
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX / window.innerWidth - 0.5);
+      mouseY.set(e.clientY / window.innerHeight - 0.5);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
+    setError(null);
+    setIsSubmitting(true);
     try {
+      if (mode === 'register') {
+        await userApi.register(email, password, password);
+      }
       await userApi.login(email, password);
-      navigate('/', { replace: true });
+      window.location.href = '/';
     } catch (err) {
       const parsed = getParsedApiError(err);
-      setError(parsed.message || '登入失敗');
+      setError(parsed.message || (mode === 'login' ? '登入失敗' : '註冊失敗'));
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-gradient shadow-lg">
-            <BarChart3 className="h-7 w-7 text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-foreground">登入 StockGPT</h1>
-          <p className="mt-1 text-sm text-secondary-text">AI 驅動的量化投資分析平台</p>
-        </div>
-
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
-          {error && (
-            <div className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-text" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full rounded-lg border border-border bg-input py-2.5 pl-10 pr-3 text-sm text-foreground placeholder:text-secondary-text/60 focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="your@email.com"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-foreground">密碼</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-secondary-text" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full rounded-lg border border-border bg-input py-2.5 pl-10 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="輸入密碼"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-          >
-            {loading ? '登入中...' : '登入'}
-            {!loading && <ArrowRight className="h-4 w-4" />}
-          </button>
-        </form>
-
-        <p className="mt-4 text-center text-sm text-secondary-text">
-          還沒有帳號？{' '}
-          <a href="/user/register" className="font-medium text-primary hover:underline">
-            註冊
-          </a>
-        </p>
+    <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[var(--login-bg-main)] py-12 font-sans selection:bg-[var(--login-accent-soft)] sm:px-6 lg:px-8 [perspective:1500px]">
+      <ParticleBackground />
+      <div className="absolute right-4 top-4 z-30">
+        <UiLanguageToggle />
       </div>
+      <div className="absolute inset-0 z-0 bg-[linear-gradient(to_right,var(--login-grid-line)_1px,transparent_1px),linear-gradient(to_bottom,var(--login-grid-line)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:var(--login-grid-mask)]" />
+      
+      <motion.div style={{ x: useTransform(smoothX, [-0.5, 0.5], [-50, 50]), y: useTransform(smoothY, [-0.5, 0.5], [-50, 50]) }}
+        className="absolute left-[20%] top-[20%] -z-10 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--login-accent-glow)] blur-[100px]" />
+      <motion.div style={{ x: useTransform(smoothX, [-0.5, 0.5], [60, -60]), y: useTransform(smoothY, [-0.5, 0.5], [60, -60]) }}
+        className="absolute right-[20%] bottom-[10%] -z-10 h-[400px] w-[400px] translate-x-1/2 translate-y-1/2 rounded-full bg-emerald-600/10 blur-[120px]" />
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex flex-col items-center justify-center mb-10 relative">
+          <motion.div style={{ x: useTransform(smoothX, [-0.5, 0.5], [-8, 8]), y: useTransform(smoothY, [-0.5, 0.5], [-8, 8]), rotate: useTransform(smoothX, [-0.5, 0.5], [-0.5, 0.5]) }}
+            className="pointer-events-none absolute -top-[20vh] -z-10 opacity-80">
+            <div className="relative flex h-[120vh] w-[120vh] items-center justify-center rounded-full border border-[var(--login-accent-soft)] bg-gradient-to-br from-[var(--login-accent-soft)] to-[hsl(214_100%_20%_/_0.18)] shadow-[inset_0_0_200px_var(--login-accent-glow)] blur-[4px]">
+              <Cpu className="h-[70vh] w-[70vh] text-[hsl(200_80%_22%_/_0.4)] brightness-50" />
+              <TrendingUp className="absolute h-[25vh] w-[25vh] translate-x-[15vh] translate-y-[15vh] text-emerald-900/30 brightness-50" />
+            </div>
+          </motion.div>
+
+          <div className="mt-8 flex flex-col items-center">
+            <h2 className="text-4xl font-extrabold tracking-tighter sm:text-6xl">
+              <span className="bg-gradient-to-r from-[var(--login-brand-start)] to-[var(--login-brand-end)] bg-clip-text text-transparent drop-shadow-[0_0_20px_var(--login-accent-glow)]">StockGPT</span>
+            </h2>
+            <h3 className="mt-1 text-xl font-bold uppercase tracking-[0.5em] text-[var(--login-text-muted)]">AI 投資分析平臺</h3>
+          </div>
+
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+            className="mt-6 flex items-center gap-2 rounded-full border border-[var(--login-accent-border)] bg-[var(--login-accent-soft)] px-3 py-1 text-[10px] font-medium text-[var(--login-accent-text)] backdrop-blur-sm">
+            <Network className="h-3 w-3" />
+            <span>{mode === 'login' ? '用戶登入' : '註冊帳號'}</span>
+          </motion.div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.1 }}
+          className="relative group z-20 pointer-events-auto">
+          <div className="pointer-events-none absolute -inset-0.5 rounded-3xl bg-gradient-to-b from-[var(--login-accent-glow)] to-[hsl(214_100%_56%_/_0.18)] opacity-50 blur-sm transition duration-1000 group-hover:opacity-100 group-hover:duration-200" />
+          <div className="pointer-events-auto relative flex flex-col overflow-hidden rounded-3xl border border-[var(--login-border-card)] bg-[var(--login-bg-card)]/80 p-8 shadow-2xl backdrop-blur-xl">
+            <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-[var(--login-accent-soft)] blur-[50px]" />
+            <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-blue-600/10 blur-[50px]" />
+
+            <div className="mb-8">
+              <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-[var(--login-text-primary)]">
+                {mode === 'register' ? (
+                  <><UserPlus className="h-6 w-6 text-emerald-400" /><span>註冊帳號</span></>
+                ) : (
+                  <><Lock className="h-5 w-5 text-[var(--login-accent-text)]" /><span>用戶登入</span></>
+                )}
+              </h1>
+              <p className="mt-2 text-sm text-[var(--login-text-secondary)]">
+                {mode === 'register' ? '建立您的 StockGPT 帳號，開始 AI 量化分析' : '使用 Email 和密碼登入您的帳號'}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <Input id="email" type="email" appearance="login"
+                  label="Email" placeholder="your@email.com" value={email}
+                  onChange={(e) => setEmail(e.target.value)} disabled={isSubmitting} autoFocus autoComplete="email" />
+                <Input id="password" type="password" appearance="login" allowTogglePassword iconType="password"
+                  label="密碼" placeholder={mode === 'register' ? '至少 6 個字元' : '輸入密碼'} value={password}
+                  onChange={(e) => setPassword(e.target.value)} disabled={isSubmitting}
+                  autoComplete={mode === 'register' ? 'new-password' : 'current-password'} />
+              </div>
+
+              {error && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="overflow-hidden">
+                  <SettingsAlert title="驗證失敗" message={error} variant="error"
+                    className="!border-[var(--login-error-border)] !bg-[var(--login-error-bg)] !text-[var(--login-error-text)]" />
+                </motion.div>
+              )}
+
+              <Button type="submit" variant="primary" size="lg"
+                className="group/btn relative h-12 w-full overflow-hidden rounded-xl border-0 bg-gradient-to-r from-[var(--login-brand-button-start)] to-[var(--login-brand-button-end)] font-medium text-[var(--login-button-text)] shadow-lg shadow-[0_18px_36px_hsl(214_100%_8%_/_0.24)] hover:from-[var(--login-brand-button-start-hover)] hover:to-[var(--login-brand-button-end-hover)]"
+                disabled={isSubmitting}>
+                <div className="relative z-10 flex items-center justify-center gap-2">
+                  {isSubmitting ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /><span>處理中...</span></>
+                  ) : mode === 'register' ? (
+                    <><ArrowRight className="h-4 w-4" /><span>註冊並登入</span></>
+                  ) : (
+                    <><ArrowRight className="h-4 w-4" /><span>登入</span></>
+                  )}
+                </div>
+                <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] pointer-events-none" />
+              </Button>
+
+              <p className="text-center text-sm text-[var(--login-text-secondary)]">
+                {mode === 'login' ? (
+                  <>還沒有帳號？{' '}<button type="button" onClick={() => { setMode('register'); setError(null); }} className="font-medium text-[var(--login-accent-text)] hover:underline">註冊</button></>
+                ) : (
+                  <>已有帳號？{' '}<button type="button" onClick={() => { setMode('login'); setError(null); }} className="font-medium text-[var(--login-accent-text)] hover:underline">登入</button></>
+                )}
+              </p>
+            </form>
+          </div>
+        </motion.div>
+
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+          className="mt-8 text-center font-mono text-xs uppercase tracking-wider text-[var(--login-text-muted)]">
+          Secure Connection · StockGPT
+        </motion.p>
+      </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `@keyframes shimmer { 100% { transform: translateX(100%); } }` }} />
     </div>
   );
 };

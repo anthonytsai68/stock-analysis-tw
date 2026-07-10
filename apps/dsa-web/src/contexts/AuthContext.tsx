@@ -2,6 +2,7 @@ import type React from 'react';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { createParsedApiError, getParsedApiError, type ParsedApiError } from '../api/error';
 import { authApi } from '../api/auth';
+import { userApi } from '../api/user';
 import { useStockPoolStore } from '../stores';
 
 type AuthContextValue = {
@@ -53,12 +54,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const status = await authApi.getStatus();
       setAuthEnabled(status.authEnabled);
-      setLoggedIn(status.loggedIn);
       setPasswordSet(status.passwordSet ?? false);
       setPasswordChangeable(status.passwordChangeable ?? false);
       setSetupState(status.setupState);
-      if (status.authEnabled && !status.loggedIn) {
-        useStockPoolStore.getState().resetDashboardState();
+
+      if (status.authEnabled) {
+        if (status.loggedIn) {
+          setLoggedIn(true);
+        } else {
+          // Check user session
+          let userOk = false;
+          try {
+            const userStatus = await userApi.getStatus();
+            if (userStatus.loggedIn) {
+              setLoggedIn(true);
+              userOk = true;
+            }
+          } catch {
+            // User status check failed — not logged in
+          }
+          if (!userOk) {
+            setLoggedIn(false);
+            useStockPoolStore.getState().resetDashboardState();
+          }
+        }
+      } else {
+        setLoggedIn(false);
       }
     } catch (err) {
       setLoadError(getParsedApiError(err));
@@ -113,6 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let logoutError: unknown = null;
     try {
       await authApi.logout();
+      try { await userApi.logout(); } catch { /* ignore */ }
     } catch (err) {
       logoutError = err;
     } finally {
@@ -122,6 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (logoutError && getParsedApiError(logoutError).status !== 401) {
       throw logoutError;
     }
+    // After logout, go to user login page
+    window.location.href = '/user/login';
   }, [fetchStatus]);
 
   return (
@@ -145,7 +169,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- useAuth is a hook, co-located for context access
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) {
