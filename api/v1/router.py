@@ -20,6 +20,7 @@ from api.v1.endpoints import (
     auth,
     backtest,
     decision_signals,
+    google_auth,
     health,
     history,
     intelligence,
@@ -122,6 +123,12 @@ router.include_router(
     admin.router,
     prefix="/admin",
     tags=["Admin"]
+)
+
+router.include_router(
+    google_auth.router,
+    prefix="/user",
+    tags=["User"]
 )
 
 router.include_router(

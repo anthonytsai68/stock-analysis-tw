@@ -24,6 +24,8 @@ EXEMPT_PATHS = frozenset({
     "/api/v1/user/login",
     "/api/v1/user/status",
     "/api/v1/user/logout",
+    "/api/v1/user/google-login",
+    "/api/v1/user/google-callback",
     "/api/health",
     "/api/v1/health",
     "/health",
